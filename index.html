@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>催眠APP</title>
     <style>
+        /* ===========================================
+           BASIC LAYOUT STYLES
+           =========================================== */
+        
         html, body {
             margin: 0;
             padding: 0;
@@ -19,11 +23,11 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'Microsoft YaHei', '微软雅黑', 'PingFang SC', 'Hiragino Sans', sans-serif;
             box-sizing: border-box;
         }
         
-        /* 手机屏幕 - 响应式设计 */
+        /* Phone Screen - Responsive Design */
         .phone-screen {
             width: 100vw;
             height: 100vh;
@@ -34,7 +38,7 @@
             box-shadow: none;
         }
         
-        /* 顶部状态栏 */
+        /* Top Status Bar */
         .status-bar {
             position: absolute;
             top: 0;
@@ -51,7 +55,7 @@
             z-index: 10;
         }
         
-        /* 应用标题栏 */
+        /* Application Title Bar */
         .app-header {
             position: absolute;
             top: 0;
@@ -74,7 +78,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        /* 着色器容器 */
+        /* Shader Container */
         #container {
             position: absolute;
             top: 0;
@@ -100,7 +104,11 @@
             display: block;
         }
         
-        /* 控制面板 */
+        /* ===========================================
+           CONTROL PANEL & INPUTS
+           =========================================== */
+        
+        /* Control Panel */
         .controls {
             margin-top: 15px;
             color: white;
@@ -150,7 +158,9 @@
             font-size: clamp(10px, 1.8vw, 14px);
         }
         
-        /* 左下角设置按钮 */
+        /* ===========================================
+           BUTTON STYLES
+           =========================================== */        /* Bottom Left Settings Button */
         .settings-gear-btn {
             position: fixed;
             bottom: 30px;
@@ -181,14 +191,14 @@
             transform: scale(0.95);
         }
         
-        /* 移动端触摸反馈 */
+        /* Mobile Touch Feedback */
         @media (hover: none) and (pointer: coarse) {
             .settings-gear-btn:active {
                 transform: scale(0.98);
             }
         }
 
-        /* 移除按钮点击时的蓝色方框 */
+        /* Remove Blue Border on Button Click */
         button {
             -webkit-tap-highlight-color: transparent;
             outline: none;
@@ -198,7 +208,7 @@
             outline: none;
         }
 
-        /* 齿轮 SVG 样式 */
+        /* Gear SVG Styles */
         .gear-svg {
             width: 48px;
             height: 48px;
@@ -216,7 +226,59 @@
             filter: drop-shadow(0 0 12px rgba(102, 126, 234, 0.7));
         }
         
-        /* 开始催眠按钮 */
+        /* Localization Button - Bottom Right */
+        .localization-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: auto;
+            height: auto;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: none;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 998;
+            overflow: visible;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            text-shadow: 0 0 8px rgba(102, 126, 234, 0.6);
+        }
+        
+        .localization-btn:hover {
+            transform: scale(1.15);
+            text-shadow: 0 0 16px rgba(102, 126, 234, 0.9), 0 0 24px rgba(128, 0, 255, 0.6);
+        }
+        
+        .localization-btn:active {
+            transform: scale(0.95);
+            text-shadow: 0 0 12px rgba(102, 126, 234, 0.7);
+        }
+        
+        /* Mobile Touch Feedback */
+        @media (hover: none) and (pointer: coarse) {
+            .localization-btn:active {
+                transform: scale(0.98);
+            }
+        }
+        
+        /* Localization Menu */
+        .localization-menu {
+            display: none;
+        }
+        
+        .localization-menu.active {
+            display: none;
+        }
+        
+        /* Start Hypnosis Button */
         .hypnosis-btn {
             position: fixed;
             bottom: 20%;
@@ -244,7 +306,11 @@
             justify-content: center;
         }
 
-        /* 小屏幕设备 (手机竖屏) */
+        /* ===========================================
+           RESPONSIVE DESIGN - HYPNOSIS BUTTON
+           =========================================== */
+        
+        /* Small Screen Devices (Mobile Portrait) */
         @media screen and (max-width: 480px) {
             .hypnosis-btn {
                 width: 100px;
@@ -253,7 +319,7 @@
             }
         }
 
-        /* 中等屏幕设备 (手机横屏/小平板) */
+        /* Medium Screen Devices (Mobile Landscape/Small Tablet) */
         @media screen and (min-width: 481px) and (max-width: 768px) {
             .hypnosis-btn {
                 width: 120px;
@@ -262,7 +328,7 @@
             }
         }
 
-        /* 大屏幕设备 (平板/桌面) */
+        /* Large Screen Devices (Tablet/Desktop) */
         @media screen and (min-width: 769px) and (max-width: 1024px) {
             .hypnosis-btn {
                 width: 140px;
@@ -271,7 +337,7 @@
             }
         }
 
-        /* 超大屏幕设备 (大桌面) */
+        /* Extra Large Screen Devices (Large Desktop) */
         @media screen and (min-width: 1025px) {
             .hypnosis-btn {
                 width: 160px;
@@ -307,32 +373,32 @@
                 inset 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         
-        /* 移动端触摸反馈 */
+        /* Mobile Touch Feedback */
         @media (hover: none) and (pointer: coarse) {
             .hypnosis-btn:active {
                 transform: translate(-50%, 50%) scale(0.98);
             }
         }
 
-        /* 强制高潮按钮 */
+        /* Forced Climax Button */
         .climax-btn {
             position: fixed;
-            bottom: 20%;
-            right: 8%;
-            transform: translateY(50%);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 50px;
+            border-radius: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 3px solid rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.4);
             color: white;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 
-                0 12px 35px rgba(102, 126, 234, 0.6),
+                0 8px 25px rgba(102, 126, 234, 0.6),
                 inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                0 0 30px rgba(128, 0, 255, 0.4);
+                0 0 20px rgba(128, 0, 255, 0.4);
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 998;
             overflow: visible;
@@ -344,71 +410,75 @@
             pointer-events: none;
         }
 
-        /* 小屏幕设备 (手机竖屏) */
+        /* Small Screen Devices (Mobile Portrait) */
         @media screen and (max-width: 480px) {
             .climax-btn {
-                width: 70px;
-                height: 70px;
-                font-size: 11px;
-            }
-        }
-
-        /* 中等屏幕设备 (手机横屏/小平板) */
-        @media screen and (min-width: 481px) and (max-width: 768px) {
-            .climax-btn {
-                width: 80px;
-                height: 80px;
+                width: 140px;
+                height: 40px;
                 font-size: 12px;
             }
         }
 
-        /* 大屏幕设备 (平板/桌面) */
-        @media screen and (min-width: 769px) and (max-width: 1024px) {
+        /* Medium Screen Devices (Mobile Landscape/Small Tablet) */
+        @media screen and (min-width: 481px) and (max-width: 768px) {
             .climax-btn {
-                width: 90px;
-                height: 90px;
+                width: 160px;
+                height: 45px;
                 font-size: 13px;
             }
         }
 
-        /* 超大屏幕设备 (大桌面) */
-        @media screen and (min-width: 1025px) {
+        /* Large Screen Devices (Tablet/Desktop) */
+        @media screen and (min-width: 769px) and (max-width: 1024px) {
             .climax-btn {
-                width: 100px;
-                height: 100px;
+                width: 180px;
+                height: 50px;
                 font-size: 14px;
             }
         }
 
-        /* 按钮显示状态（催眠激活时） */
+        /* Extra Large Screen Devices (Large Desktop) */
+        @media screen and (min-width: 1025px) {
+            .climax-btn {
+                width: 200px;
+                height: 55px;
+                font-size: 15px;
+            }
+        }
+
+        /* Button Display State (When Hypnosis is Active) */
         .climax-btn.active {
             opacity: 1;
             pointer-events: all;
         }
 
         .climax-btn:hover {
-            transform: translateY(50%) scale(1.12);
+            transform: translateX(-50%) scale(1.08);
             box-shadow: 
-                0 16px 45px rgba(102, 126, 234, 0.8),
+                0 12px 35px rgba(102, 126, 234, 0.8),
                 inset 0 1px 0 rgba(255, 255, 255, 0.4),
-                0 0 40px rgba(128, 0, 255, 0.6);
+                0 0 30px rgba(128, 0, 255, 0.6);
         }
 
         .climax-btn:active {
-            transform: translateY(50%) scale(0.93);
+            transform: translateX(-50%) scale(0.95);
             box-shadow: 
-                0 6px 18px rgba(102, 126, 234, 0.4),
+                0 4px 15px rgba(102, 126, 234, 0.4),
                 inset 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
-        /* 移动端触摸反馈 */
+        /* Mobile Touch Feedback */
         @media (hover: none) and (pointer: coarse) {
             .climax-btn:active {
-                transform: translateY(50%) scale(0.96);
+                transform: translateX(-50%) scale(0.97);
             }
         }
         
-        /* 启动催眠按钮动画 */
+        /* ===========================================
+           ANIMATIONS & EFFECTS
+           =========================================== */
+        
+        /* Start Hypnosis Button Animation */
         @keyframes hypnosisActivate {
             0% {
                 opacity: 0;
@@ -424,24 +494,24 @@
             animation: hypnosisActivate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
-        /* 强制高潮脉冲动画 */
+        /* Forced Climax Pulse Animation */
         @keyframes climaxPulse {
             0% {
-                transform: translateY(50%) scale(1);
+                transform: translateX(-50%) scale(1);
                 box-shadow: 
                     0 12px 35px rgba(102, 126, 234, 0.6),
                     inset 0 1px 0 rgba(255, 255, 255, 0.3),
                     0 0 30px rgba(128, 0, 255, 0.4);
             }
             50% {
-                transform: translateY(50%) scale(1.25);
+                transform: translateX(-50%) scale(1.25);
                 box-shadow: 
                     0 25px 70px rgba(102, 126, 234, 0.9),
                     inset 0 1px 0 rgba(255, 255, 255, 0.5),
                     0 0 80px rgba(128, 0, 255, 0.8);
             }
             100% {
-                transform: translateY(50%) scale(1);
+                transform: translateX(-50%) scale(1);
                 box-shadow: 
                     0 12px 35px rgba(102, 126, 234, 0.6),
                     inset 0 1px 0 rgba(255, 255, 255, 0.3),
@@ -449,7 +519,7 @@
             }
         }
         
-        /* 自定义滚动条 */
+        /* Custom Scrollbar */
         .controls::-webkit-scrollbar {
             width: 4px;
         }
@@ -464,7 +534,11 @@
             border-radius: 2px;
         }
         
-        /* 浮窗设置菜单 */
+        /* ===========================================
+           MODAL & DIALOGS
+           =========================================== */
+        
+        /* Floating Settings Menu */
         .settings-modal {
             display: none;
             position: fixed;
@@ -546,7 +620,7 @@
             }
         }
         
-        /* 半透明背景 */
+        /* Semi-transparent Background */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -567,22 +641,22 @@
 <body>
     <div class="phone-screen">
             
-            <!-- 应用标题栏 -->
+            <!-- Application Title Bar -->
             <div class="app-header">
                 催眠APP
             </div>
             
-            <!-- 主要内容区域 -->
+            <!-- Main Content Area -->
             <div id="container">
                 <canvas id="glCanvas" width="500" height="500"></canvas>
             </div>
             
-            <!-- 模态框背景 -->
+            <!-- Modal Background -->
             <div id="modalOverlay" class="modal-overlay" onclick="closeSettings()"></div>
             
-            <!-- 左下角设置按钮 -->
+            <!-- Bottom Left Settings Button -->
             <button class="settings-gear-btn" onclick="toggleSettings()" title="设置">
-                <svg class="gear-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <svg class="gear-svg" viewBox="0 0 200 200">
                     <defs>
                         <linearGradient id="gearGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" style="stop-color:#764ba2;stop-opacity:1" />
@@ -598,90 +672,88 @@
                         </filter>
                     </defs>
                     
-                    <!-- 齿轮齿（16个） -->
+                    <!-- 16 Gear Teeth -->
                     <g fill="url(#gearGradient)" filter="url(#gearGlow)">
-                        <!-- 上 -->
                         <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        <!-- 右上 -->
                         <g transform="rotate(22.5 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 右上偏 -->
+                        <!-- Upper Right Offset -->
                         <g transform="rotate(45 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 右 -->
+                        <!-- Right -->
                         <g transform="rotate(67.5 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 右下偏 -->
+                        <!-- Lower Right Offset -->
                         <g transform="rotate(90 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 右下 -->
+                        <!-- Lower Right -->
                         <g transform="rotate(112.5 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 下偏 -->
+                        <!-- Lower Right Offset -->
                         <g transform="rotate(135 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 下 -->
+                        <!-- Down -->
                         <g transform="rotate(157.5 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 下左偏 -->
+                        <!-- Lower Left Offset -->
                         <g transform="rotate(180 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 左下 -->
+                        <!-- Lower Left -->
                         <g transform="rotate(202.5 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 左偏 -->
+                        <!-- Left Offset -->
                         <g transform="rotate(225 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 左上偏 -->
+                        <!-- Upper Left Offset -->
                         <g transform="rotate(247.5 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 左 -->
+                        <!-- Left -->
                         <g transform="rotate(270 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 左上 -->
+                        <!-- Upper Left -->
                         <g transform="rotate(292.5 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 上左偏 -->
+                        <!-- Upper Left Offset -->
                         <g transform="rotate(315 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
-                        <!-- 上偏 -->
+                        <!-- Upper Offset -->
                         <g transform="rotate(337.5 100 100)">
                             <rect x="92" y="20" width="16" height="18" rx="2"/>
                         </g>
                         
-                        <!-- 齿轮主体圆盘 -->
+                        <!-- Gear Main Disk -->
                         <circle cx="100" cy="100" r="55" fill="url(#gearGradient)"/>
                     </g>
                     
-                    <!-- 中心孔 -->
+                    <!-- Center Hole -->
                     <circle cx="100" cy="100" r="20" fill="#1a1a2e"/>
                     
-                    <!-- 中心装饰环 -->
+                    <!-- Center Decorative Ring -->
                     <circle cx="100" cy="100" r="20" fill="none" stroke="#667eea" stroke-width="2.5"/>
                     
-                    <!-- 中心亮点 -->
+                    <!-- Center Bright Spot -->
                     <circle cx="100" cy="100" r="12" fill="none" stroke="white" stroke-width="1" opacity="0.5"/>
                     
-                    <!-- 中心点 -->
+                    <!-- Center Dot -->
                     <circle cx="100" cy="100" r="4" fill="#a78bfa"/>
                 </svg>
             </button>
             
-            <!-- 浮窗菜单 -->
+            <!-- Floating Menu -->
             <div id="settingsModal" class="settings-modal">
                 <div class="modal-header">
                     <h2>⚙️ 设置</h2>
@@ -719,6 +791,21 @@
                     </div>
                     
                     <div class="control-group" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
+                        <label>语言: <span class="value-display" id="languageDisplay">日本語</span></label>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <button onclick="switchLanguage('ja')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 6px; color: white; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.3s;">
+                                日本語
+                            </button>
+                            <button onclick="switchLanguage('en')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 6px; color: white; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.3s;">
+                                English
+                            </button>
+                            <button onclick="switchLanguage('zh')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 6px; color: white; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.3s;">
+                                中文
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group" style="margin-top: 15px;">
                         <button onclick="resetAllSettings()" style="width: 100%; padding: 10px; background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%); border: none; border-radius: 8px; color: white; font-weight: 700; cursor: pointer; font-size: 14px; transition: all 0.3s;">
                             🔄 重置所有设置
                         </button>
@@ -726,25 +813,151 @@
                 </div>
             </div>
             
-            <!-- 开始催眠按钮 -->
-            <button class="hypnosis-btn" onclick="toggleHypnosis()">开始催眠</button>
+            <!-- Start Hypnosis Button -->
+            <button class="hypnosis-btn" onclick="toggleHypnosis()" id="hypnosisBtn">催眠を開始</button>
             
-            <!-- 强制高潮按钮 -->
-            <button class="climax-btn" onclick="triggerClimaxEffect()" title="强制高潮">强制高潮</button>
+            <!-- Forced Climax Button -->
+            <button class="climax-btn" onclick="triggerClimaxEffect()" title="強制オルガスム" id="climaxBtn">強制オルガスム</button>
         </div>
     </div>
 
     <script>
-        // 全局错误处理
+        /* ================================================================
+           LOCALIZATION SYSTEM
+           ================================================================ */
+        
+        // Localization system
+        const translations = {
+            ja: {
+                appTitle: '催眠APP',
+                settings: '⚙️ 設定',
+                startHypnosis: '催眠開始',
+                endHypnosis: '催眠終了',
+                climax: '強制絶頂',
+                resetAll: '🔄 すべての設定をリセット',
+                spiralArms: 'スパイラルアーム:',
+                spacing: '間隔:',
+                spiralIntensity: 'スパイラル強度:',
+                rippleIntensity: '波紋強度:',
+                rippleSpeed: '波紋速度:',
+                speed: '速度:',
+                language: '言語'
+            },
+            en: {
+                appTitle: 'Hypnosis APP',
+                settings: '⚙️ Settings',
+                startHypnosis: 'Start Hypnosis',
+                endHypnosis: 'End Hypnosis',
+                climax: 'Forced Climax',
+                resetAll: '🔄 Reset All Settings',
+                spiralArms: 'Spiral Arms:',
+                spacing: 'Spacing:',
+                spiralIntensity: 'Spiral Intensity:',
+                rippleIntensity: 'Ripple Intensity:',
+                rippleSpeed: 'Ripple Speed:',
+                speed: 'Speed:',
+                language: 'Language'
+            },
+            zh: {
+                appTitle: '催眠APP',
+                settings: '⚙️ 设置',
+                startHypnosis: '开始催眠',
+                endHypnosis: '结束催眠',
+                climax: '强制高潮',
+                resetAll: '🔄 重置所有设置',
+                spiralArms: '螺旋臂:',
+                spacing: '间距:',
+                spiralIntensity: '螺旋强度:',
+                rippleIntensity: '光环强度:',
+                rippleSpeed: '光环速度:',
+                speed: '速度:',
+                language: '语言'
+            }
+        };
+        
+        let currentLanguage = 'ja'; // Default language is Japanese
+        
+        // Update UI text based on current language
+        function updateLanguage() {
+            const t = translations[currentLanguage];
+            
+            // Update app header
+            const appHeader = document.querySelector('.app-header');
+            if (appHeader) appHeader.textContent = t.appTitle;
+            
+            // Update settings modal title
+            const settingsTitle = document.querySelector('.modal-header h2');
+            if (settingsTitle) settingsTitle.textContent = t.settings;
+            
+            // Update buttons
+            const hypnosisBtn = document.getElementById('hypnosisBtn');
+            const climaxBtn = document.getElementById('climaxBtn');
+            if (hypnosisBtn) hypnosisBtn.textContent = isHypnosisActive ? t.endHypnosis : t.startHypnosis;
+            if (climaxBtn) climaxBtn.textContent = t.climax;
+            
+            // Update language display in settings
+            const languageNames = { ja: '日本語', en: 'English', zh: '中文' };
+            const languageDisplay = document.getElementById('languageDisplay');
+            if (languageDisplay) languageDisplay.textContent = languageNames[currentLanguage] || '日本語';
+            
+            // Update control labels
+            const labels = document.querySelectorAll('.control-group label');
+            const labelTexts = [t.spiralArms, t.spacing, t.spiralIntensity, t.rippleIntensity, t.rippleSpeed, t.speed, t.language];
+            labels.forEach((label, index) => {
+                if (index < labelTexts.length && index !== 6) { // Skip language label (it's handled separately)
+                    const valueSpan = label.querySelector('.value-display');
+                    const currentValue = valueSpan ? valueSpan.textContent : '';
+                    label.innerHTML = `${labelTexts[index]} <span class="value-display">${currentValue}</span>`;
+                }
+            });
+            
+            // Update reset button
+            const resetBtn = document.querySelector('[onclick="resetAllSettings()"]');
+            if (resetBtn) resetBtn.textContent = t.resetAll;
+            
+            // Save language preference
+            try {
+                localStorage.setItem('preferredLanguage', currentLanguage);
+            } catch (e) {
+                console.warn('Failed to save language preference:', e);
+            }
+        }
+        
+        // Switch to a different language
+        window.switchLanguage = function(lang) {
+            if (translations[lang]) {
+                currentLanguage = lang;
+                updateLanguage();
+            }
+        };
+        
+        // Load saved language preference on page load
+        function loadLanguagePreference() {
+            try {
+                const saved = localStorage.getItem('preferredLanguage');
+                if (saved && translations[saved]) {
+                    currentLanguage = saved;
+                }
+            } catch (e) {
+                console.warn('Failed to load language preference:', e);
+            }
+            updateLanguage();
+        }
+        
+        // Global error handling
         window.addEventListener('error', function(event) {
-            console.error('❌ JavaScript错误:', event.message);
-            console.error('文件:', event.filename);
-            console.error('行号:', event.lineno);
-            console.error('列号:', event.colno);
-            console.error('完整错误:', event.error);
+            console.error('❌ JavaScript error:', event.message);
+            console.error('File:', event.filename);
+            console.error('Line number:', event.lineno);
+            console.error('Column number:', event.colno);
+            console.error('Full error:', event.error);
         });
         
-        // 顶点着色器
+        /* ================================================================
+           WEBGL INITIALIZATION & SHADERS
+           ================================================================ */
+        
+        // Vertex shader
         const vertexShaderSource = `
             attribute vec4 aVertexPosition;
             void main() {
@@ -752,7 +965,7 @@
             }
         `;
 
-        // 片段着色器
+        // Fragment shader
         const fragmentShaderSource = `
             #ifdef GL_ES
             precision mediump float;
@@ -825,19 +1038,19 @@
             }
         `;
 
-        // WebGL 初始化
+        // WebGL Initialization
         const canvas = document.getElementById('glCanvas');
         
         if (!canvas) {
-            console.error('找不到canvas元素 glCanvas');
+            console.error('Canvas element glCanvas not found');
             throw new Error('Canvas element not found');
         }
         
-        // 动态设置canvas分辨率以适应容器
+        // Dynamically set canvas resolution to fit container
         function resizeCanvas() {
             const container = document.getElementById('container');
             if (!container) {
-                console.error('找不到容器元素 container');
+                console.error('Container element not found');
                 return;
             }
             canvas.width = container.clientWidth;
@@ -850,21 +1063,21 @@
         const gl = canvas.getContext('webgl');
 
         if (!gl) {
-            console.error('WebGL不可用');
-            alert('您的浏览器不支持WebGL');
+            console.error('WebGL not available');
+            alert('Your browser does not support WebGL');
             throw new Error('WebGL context not available');
         }
         
-        console.log('WebGL初始化成功');
+        console.log('WebGL initialization successful');
 
-        // 编译着色器
+        // Compile shader
         function createShader(gl, type, source) {
             const shader = gl.createShader(type);
             gl.shaderSource(shader, source);
             gl.compileShader(shader);
 
             if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                console.error('着色器编译错误:', gl.getShaderInfoLog(shader));
+                console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
                 gl.deleteShader(shader);
                 return null;
             }
@@ -872,7 +1085,7 @@
             return shader;
         }
 
-        // 创建着色器程序
+        // Create shader program
         function createShaderProgram(gl, vertexSource, fragmentSource) {
             const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
             const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
@@ -883,17 +1096,17 @@
             gl.linkProgram(shaderProgram);
 
             if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-                console.error('着色器程序链接错误:', gl.getProgramInfoLog(shaderProgram));
+                console.error('Shader program linking error:', gl.getProgramInfoLog(shaderProgram));
                 return null;
             }
 
             return shaderProgram;
         }
 
-        // 初始化
+        // Initialize shader program
         const shaderProgram = createShaderProgram(gl, vertexShaderSource, fragmentShaderSource);
 
-        // 获取attribute和uniform位置
+        // Get attribute and uniform locations
         const programInfo = {
             attribLocations: {
                 vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
@@ -913,7 +1126,12 @@
             },
         };
 
-        // 创建缓冲区
+        
+        /* ================================================================
+           BUFFER & CONTROL PARAMETERS
+           ================================================================ */
+        
+        // Create buffer
         const positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
@@ -926,7 +1144,7 @@
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-        // 控制参数 - 默认值
+        // Control parameters - Default values
         let spiralArms = 6.0;
         let spiralSpacing = 4.0;
         let spiralGlow = 0.02;
@@ -934,7 +1152,7 @@
         let rippleSpeed = 4.0;
         let rotationSpeed = 2.0;
         
-        // 为了方便在setupControls中访问，创建一个参数映射
+        // For convenient access in setupControls, create a parameter map
         const paramMap = {
             spiralArms: () => spiralArms,
             spiralSpacing: () => spiralSpacing,
@@ -944,7 +1162,7 @@
             rotationSpeed: () => rotationSpeed
         };
 
-        // 自动保存当前设置到 localStorage
+        // Auto-save current settings to localStorage
         function autoSaveSettings() {
             try {
                 const preset = {
@@ -957,12 +1175,12 @@
                 };
                 localStorage.setItem('hypnosisSettings', JSON.stringify(preset));
             } catch (e) {
-                // 如果 localStorage 不可用，静默失败（不打扰用户）
-                console.warn('设置自动保存失败:', e);
+                // If localStorage is not available, fail silently
+                console.warn('Failed to auto-save settings:', e);
             }
         }
 
-        // 自动加载之前保存的设置
+        // Auto-load previously saved settings
         function autoLoadSettings() {
             try {
                 const preset = localStorage.getItem('hypnosisSettings');
@@ -976,14 +1194,18 @@
                     rotationSpeed = settings.rotationSpeed !== undefined ? settings.rotationSpeed : rotationSpeed;
                 }
             } catch (e) {
-                console.warn('设置自动加载失败:', e);
+                console.warn('Failed to auto-load settings:', e);
             }
         }
 
-        // 页面加载时自动恢复设置
+        // Restore settings when page loads
         autoLoadSettings();
 
-        // 控制器事件
+        /* ================================================================
+           CONTROL SETUP & UI INTERACTIONS
+           ================================================================ */
+        
+        // Controller events
         function setupControls() {
             const controls = [
                 { id: 'spiralArms', valueId: 'armsValue', variable: 'spiralArms' },
@@ -999,20 +1221,20 @@
                 const valueDisplay = document.getElementById(control.valueId);
                 
                 if (!slider || !valueDisplay) {
-                    console.warn(`元素未找到: ${control.id} 或 ${control.valueId}`);
+                    console.warn(`Element not found: ${control.id} or ${control.valueId}`);
                     return;
                 }
                 
-                // 初始化滑块值为当前变量值
+                // Initialize slider value to current variable value
                 const currentValue = paramMap[control.variable]();
                 slider.value = currentValue;
                 
-                // 同步更新显示值
+                // Sync display value
                 if (control.variable === 'spiralGlow') {
                     valueDisplay.textContent = currentValue.toFixed(2);
                 } else if (control.variable === 'rippleSpeed') {
-                    // 光环速度显示正负号和说明
-                    const direction = currentValue > 0 ? '(扩散)' : currentValue < 0 ? '(收缩)' : '(静止)';
+                    // Display ripple speed with direction and description
+                    const direction = currentValue > 0 ? '(Expanding)' : currentValue < 0 ? '(Contracting)' : '(Stationary)';
                     valueDisplay.textContent = `${currentValue.toFixed(1)} ${direction}`;
                 } else {
                     valueDisplay.textContent = currentValue.toFixed(1);
@@ -1020,12 +1242,12 @@
                 
                 slider.addEventListener('input', function() {
                     const value = parseFloat(this.value);
-                    // 对于螺旋发光使用更精确的显示格式
+                    // Use more precise display format for spiral glow
                     if (control.variable === 'spiralGlow') {
                         valueDisplay.textContent = value.toFixed(2);
                     } else if (control.variable === 'rippleSpeed') {
-                        // 光环速度显示正负号和说明
-                        const direction = value > 0 ? '(扩散)' : value < 0 ? '(收缩)' : '(静止)';
+                        // Display ripple speed with direction and description
+                        const direction = value > 0 ? '(Expanding)' : value < 0 ? '(Contracting)' : '(Stationary)';
                         valueDisplay.textContent = `${value.toFixed(1)} ${direction}`;
                     } else {
                         valueDisplay.textContent = value.toFixed(1);
@@ -1040,41 +1262,39 @@
                         case 'rotationSpeed': rotationSpeed = value; break;
                     }
                     
-                    // 每次改变时自动保存
+                    // Auto-save every time changes
                     autoSaveSettings();
                 });
             });
         }
 
-        // 在加载设置后立即设置控制器，确保滑块和数值同步
+        // Set up controls after loading settings to ensure sliders and values are in sync
         try {
             setupControls();
         } catch (e) {
-            console.error('设置控制器失败:', e);
+            console.error('Failed to set up controls:', e);
         }
 
-        // 应用控制功能
+        /* ================================================================
+           APPLICATION CONTROL & STATE MANAGEMENT
+           ================================================================ */
+        
+        // Apply control functionality
         let isPaused = false;
         let isHypnosisActive = false;
-        let hypnosisStartTime = null; // 启动动画时间
-        let hypnosisEndTime = null; // 结束动画时间
-        let climaxStartTime = null; // 高潮效果开始时间
+        let hypnosisStartTime = null; // Animation start time
+        let hypnosisEndTime = null; // Animation end time
+        let climaxStartTime = null; // Climax effect start time
         let animationId;
 
-        // 暂停/播放功能
-        window.togglePause = function() {
-            isPaused = !isPaused;
-            const buttons = document.querySelectorAll('.control-btn');
-            buttons[1].innerHTML = isPaused ? '<span>▶️</span><span>播放</span>' : '<span>⏸️</span><span>暂停</span>';
-        };
-
-        // 开始催眠按钮
+        // Start hypnosis button
         window.toggleHypnosis = function() {
             const hypnosisBtn = document.querySelector('.hypnosis-btn');
             isHypnosisActive = !isHypnosisActive;
-            hypnosisBtn.textContent = isHypnosisActive ? '结束催眠' : '开始催眠';
+            const t = translations[currentLanguage];
+            hypnosisBtn.textContent = isHypnosisActive ? t.endHypnosis : t.startHypnosis;
             
-            // 管理强制高潮按钮的可见性
+            // Manage the visibility of the forced climax button
             const climaxBtn = document.querySelector('.climax-btn');
             if (isHypnosisActive) {
                 climaxBtn.classList.add('active');
@@ -1082,78 +1302,47 @@
                 climaxBtn.classList.remove('active');
             }
             
-            // 当激活催眠时，重置暂停状态和启动动画
+            // When activating hypnosis, reset pause state and start animation
             if (isHypnosisActive) {
                 isPaused = false;
-                hypnosisStartTime = null; // 重置为null，下次render时会设置为当前时间
-                hypnosisEndTime = null; // 重置结束时间
+                hypnosisStartTime = null; // Reset to null, will be set to current time on next render
+                hypnosisEndTime = null; // Reset end time
                 
-                // 添加启动动画类
+                // Add startup animation class
                 hypnosisBtn.classList.add('activating');
                 setTimeout(() => hypnosisBtn.classList.remove('activating'), 600);
             } else {
-                // 结束催眠时，记录结束开始的时间以进行消退动画
+                // When ending hypnosis, record the time to start fade-out animation
                 hypnosisEndTime = performance.now();
             }
         };
 
-        // 强制高潮效果
+        // Forced climax effect
         window.triggerClimaxEffect = function() {
             if (!isHypnosisActive) {
-                alert('请先开始催眠');
+                const t = translations[currentLanguage];
+                const alerts = {
+                    ja: '先に催眠を開始してください',
+                    en: 'Please start hypnosis first',
+                    zh: '请先开始催眠'
+                };
+                alert(alerts[currentLanguage] || alerts.en);
                 return;
             }
             
-            // 记录高潮效果的开始时间
+            // Record the start time of the climax effect
             climaxStartTime = performance.now();
             
             const climaxBtn = document.querySelector('.climax-btn');
             
-            // 只触发脉冲动画，不结束催眠
+            // Trigger pulse animation
             climaxBtn.style.animation = 'none';
             setTimeout(() => {
                 climaxBtn.style.animation = 'climaxPulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
             }, 10);
         };
 
-        // 重置设置
-        window.resetSettings = function() {
-            spiralArms = 6.0;
-            spiralSpacing = 4.0;
-            spiralGlow = 0.02;
-            rippleGlow = 1.0;
-            rippleSpeed = 4.0;
-            rotationSpeed = 2.0;
-            
-            // 更新滑块值
-            document.getElementById('spiralArms').value = spiralArms;
-            document.getElementById('spiralSpacing').value = spiralSpacing;
-            document.getElementById('spiralGlow').value = spiralGlow;
-            document.getElementById('rippleGlow').value = rippleGlow;
-            document.getElementById('rippleSpeed').value = rippleSpeed;
-            document.getElementById('rotationSpeed').value = rotationSpeed;
-            
-            // 更新显示值
-            document.getElementById('armsValue').textContent = spiralArms.toFixed(1);
-            document.getElementById('spacingValue').textContent = spiralSpacing.toFixed(1);
-            document.getElementById('spiralGlowValue').textContent = spiralGlow.toFixed(2);
-            document.getElementById('rippleGlowValue').textContent = rippleGlow.toFixed(1);
-            document.getElementById('rippleSpeedValue').textContent = `${rippleSpeed.toFixed(1)} (扩散)`;
-            document.getElementById('speedValue').textContent = rotationSpeed.toFixed(1);
-        };
-
-        // 全屏功能
-        window.toggleFullscreen = function() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
-        };
-
-        // 不再保存/加载预设，保留重置功能
-
-        // 设置菜单控制
+        // Settings menu control
         window.toggleSettings = function() {
             const modal = document.getElementById('settingsModal');
             const overlay = document.getElementById('modalOverlay');
@@ -1168,9 +1357,9 @@
             overlay.classList.remove('active');
         };
 
-        // 重置所有设置
+        // Reset all settings
         window.resetAllSettings = function() {
-            // 默认值
+            // Default values
             const defaults = {
                 spiralArms: 6.0,
                 spiralSpacing: 4.0,
@@ -1180,7 +1369,7 @@
                 rotationSpeed: 2.0
             };
             
-            // 重置所有input元素的值
+            // Reset all input element values
             document.getElementById('spiralArms').value = defaults.spiralArms;
             document.getElementById('spiralSpacing').value = defaults.spiralSpacing;
             document.getElementById('spiralGlow').value = defaults.spiralGlow;
@@ -1188,7 +1377,7 @@
             document.getElementById('rippleSpeed').value = defaults.rippleSpeed;
             document.getElementById('rotationSpeed').value = defaults.rotationSpeed;
             
-            // 更新显示值
+            // Update display values
             document.getElementById('armsValue').textContent = defaults.spiralArms.toFixed(1);
             document.getElementById('spacingValue').textContent = defaults.spiralSpacing.toFixed(1);
             document.getElementById('spiralGlowValue').textContent = defaults.spiralGlow.toFixed(2);
@@ -1196,7 +1385,7 @@
             document.getElementById('rippleSpeedValue').textContent = defaults.rippleSpeed.toFixed(1);
             document.getElementById('speedValue').textContent = defaults.rotationSpeed.toFixed(1);
             
-            // 更新全局变量
+            // Update global variables
             spiralArms = defaults.spiralArms;
             spiralSpacing = defaults.spiralSpacing;
             spiralGlow = defaults.spiralGlow;
@@ -1204,21 +1393,30 @@
             rippleSpeed = defaults.rippleSpeed;
             rotationSpeed = defaults.rotationSpeed;
             
-            // 清除浏览器缓存（localStorage）
+            // Clear browser cache (localStorage)
             localStorage.clear();
             
-            // 显示重置成功的反馈
-            alert('✅ 所有设置已重置！');
+            // Show reset successful feedback with localization
+            const resetMessages = {
+                ja: '✅ すべての設定がリセットされました！',
+                en: '✅ All settings have been reset!',
+                zh: '✅ 所有设置已重置！'
+            };
+            alert(resetMessages[currentLanguage] || resetMessages.en);
         };
 
-        // ESC键关闭菜单
+        // ESC key closes menu
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeSettings();
             }
         });
 
-        // 渲染循环
+        /* ================================================================
+           ANIMATION & RENDER LOOP
+           ================================================================ */
+        
+        // Render loop
         let lastTime = 0;
         let pausedTime = 0;
         
@@ -1230,37 +1428,37 @@
             let activationProgress = 0.0;
             let deactivationProgress = 0.0;
             
-            // 计算高潮强度（从climaxStartTime开始的0.6秒内线性衰减）
+            // Calculate climax intensity (linear decay from 1.0 to 0.0 over 0.6 seconds from climaxStartTime)
             let climaxIntensity = 0.0;
             if (climaxStartTime !== null) {
-                const climaxDuration = 600; // 毫秒
+                const climaxDuration = 600; // milliseconds
                 const currentTime = performance.now();
                 const climaxElapsed = currentTime - climaxStartTime;
                 
                 if (climaxElapsed < climaxDuration) {
-                    // 从1.0线性衰减到0.0
+                    // Linear decay from 1.0 to 0.0
                     climaxIntensity = Math.max(0.0, 1.0 - (climaxElapsed / climaxDuration));
                 } else {
-                    // 高潮效果已结束
+                    // Climax effect has ended
                     climaxStartTime = null;
                     climaxIntensity = 0.0;
                 }
             }
 
-            // 只有在催眠激活时才绘制着色器
+            // Only draw shader when hypnosis is active
             if (isHypnosisActive) {
-                // 如果是首次激活，记录启动时间
+                // If first time activated, record start time
                 if (hypnosisStartTime === null) {
                     hypnosisStartTime = time;
                     hypnosisEndTime = null;
                 }
 
-                // 计算启动动画进度 (0-1，历时600ms)
-                const activationDuration = 600; // 毫秒
+                // Calculate startup animation progress (0-1, duration 600ms)
+                const activationDuration = 600; // milliseconds
                 activationProgress = Math.min((time - hypnosisStartTime) / activationDuration, 1.0);
 
                 if (!isPaused) {
-                    time *= 0.001; // 转换为秒
+                    time *= 0.001; // Convert to seconds
                     lastTime = time - pausedTime;
                 } else {
                     pausedTime = (time * 0.001) - lastTime;
@@ -1268,17 +1466,17 @@
 
                 gl.useProgram(shaderProgram);
 
-                // 设置attributes
+                // Set attributes
                 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
                 gl.vertexAttribPointer(programInfo.attribLocations.vertexPosition, 2, gl.FLOAT, false, 0, 0);
                 gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
 
-                // 根据启动进度调整参数
-                // 渐进式增加螺旋强度、光环强度等，形成"苏醒"效果
+                // Adjust parameters based on activation progress
+                // Gradually increase spiral intensity, ripple intensity, etc. to create "awakening" effect
                 const currentSpiralGlow = spiralGlow * activationProgress;
                 const currentRippleGlow = rippleGlow * activationProgress;
 
-                // 设置uniforms
+                // Set uniforms
                 gl.uniform2f(programInfo.uniformLocations.resolution, canvas.width, canvas.height);
                 gl.uniform1f(programInfo.uniformLocations.time, lastTime);
                 gl.uniform1f(programInfo.uniformLocations.spiralArms, spiralArms);
@@ -1293,15 +1491,15 @@
 
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
             } else if (hypnosisEndTime !== null) {
-                // 结束催眠后的消退动画
-                const deactivationDuration = 600; // 毫秒
+                // Fade-out animation after ending hypnosis
+                const deactivationDuration = 600; // milliseconds
                 const currentTime = performance.now();
                 deactivationProgress = Math.min((currentTime - hypnosisEndTime) / deactivationDuration, 1.0);
 
                 if (deactivationProgress < 1.0) {
-                    // 动画还在进行中
+                    // Animation is still in progress
                     if (!isPaused) {
-                        time *= 0.001; // 转换为秒
+                        time *= 0.001; // Convert to seconds
                         lastTime = time - pausedTime;
                     } else {
                         pausedTime = (time * 0.001) - lastTime;
@@ -1309,16 +1507,16 @@
 
                     gl.useProgram(shaderProgram);
 
-                    // 设置attributes
+                    // Set attributes
                     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
                     gl.vertexAttribPointer(programInfo.attribLocations.vertexPosition, 2, gl.FLOAT, false, 0, 0);
                     gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
 
-                    // 消退时逐渐减弱效果
+                    // Gradually weaken effects during fade-out
                     const currentSpiralGlow = spiralGlow * (1.0 - deactivationProgress);
                     const currentRippleGlow = rippleGlow * (1.0 - deactivationProgress);
 
-                    // 设置uniforms
+                    // Set uniforms
                     gl.uniform2f(programInfo.uniformLocations.resolution, canvas.width, canvas.height);
                     gl.uniform1f(programInfo.uniformLocations.time, lastTime);
                     gl.uniform1f(programInfo.uniformLocations.spiralArms, spiralArms);
@@ -1327,13 +1525,13 @@
                     gl.uniform1f(programInfo.uniformLocations.rippleGlow, currentRippleGlow);
                     gl.uniform1f(programInfo.uniformLocations.rippleSpeed, rippleSpeed);
                     gl.uniform1f(programInfo.uniformLocations.rotationSpeed, rotationSpeed);
-                    gl.uniform1f(programInfo.uniformLocations.activationProgress, 1.0); // 已完全启动
+                    gl.uniform1f(programInfo.uniformLocations.activationProgress, 1.0); // Already fully activated
                     gl.uniform1f(programInfo.uniformLocations.deactivationProgress, deactivationProgress);
                     gl.uniform1f(programInfo.uniformLocations.climaxIntensity, climaxIntensity);
 
                     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
                 } else {
-                    // 动画完成，清空结束时间
+                    // Animation complete, clear end time
                     hypnosisEndTime = null;
                 }
             }
@@ -1342,7 +1540,10 @@
         }
 
         requestAnimationFrame(render);
-        console.log('渲染循环已启动');
+        console.log('Render loop started');
+        
+        // Load language preference on page load
+        loadLanguagePreference();
     </script>
 </body>
 </html>
