@@ -1,937 +1,1162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>催眠APP</title>
     <style>
         /* ===========================================
-           BASIC LAYOUT STYLES
+           HYPNO GLASS DESIGN TOKENS
+           Synced with Figma: Hypno App — Modern Glass UI
            =========================================== */
-        
+        :root {
+            --bg-canvas: #05050a;
+            --surface-glass: rgba(20, 20, 36, 0.62);
+            --surface-glass-hover: rgba(30, 30, 52, 0.78);
+            --surface-glass-elevated: rgba(20, 20, 36, 0.84);
+            --surface-glass-subtle: rgba(255, 255, 255, 0.07);
+            --border-glass: rgba(255, 255, 255, 0.14);
+            --border-glass-strong: rgba(255, 255, 255, 0.24);
+            --border-accent: rgba(166, 140, 250, 0.48);
+
+            --accent-primary: #7c5cff;
+            --accent-secondary: #c084fc;
+            --accent-climax: #f472b6;
+
+            --text-primary: #f8fafc;
+            --text-secondary: #a3b0c7;
+            --text-muted: #738099;
+
+            --danger-base: #fb7185;
+            --danger-bg: rgba(251, 113, 133, 0.12);
+            --danger-border: rgba(251, 113, 133, 0.35);
+
+            --radius-pill: 999px;
+            --radius-drawer: 28px;
+            --radius-control: 12px;
+
+            --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+            --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'PingFang SC', 'Hiragino Sans', 'Microsoft YaHei', sans-serif;
+            --font-mono: 'JetBrains Mono', 'SFMono-Regular', ui-monospace, Menlo, Consolas, monospace;
+        }
+
+        /* ===========================================
+           BASE & FULL-BLEED CANVAS
+           =========================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
+            overflow: hidden;
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            user-select: none;
+            -webkit-user-select: none;
         }
-        
-        body {
-            padding: 0;
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'Microsoft YaHei', '微软雅黑', 'PingFang SC', 'Hiragino Sans', sans-serif;
-            box-sizing: border-box;
+
+        button {
+            font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
-        
-        /* Phone Screen - Responsive Design */
-        .phone-screen {
+
+        button:focus-visible {
+            box-shadow: 0 0 0 2px var(--bg-canvas), 0 0 0 4px var(--accent-primary);
+        }
+
+        .app-shell {
+            position: relative;
             width: 100vw;
             height: 100vh;
-            background: #000;
-            border-radius: 0;
-            overflow: visible;
-            position: relative;
-            box-shadow: none;
+            height: 100dvh;
+            background: var(--bg-canvas);
+            overflow: hidden;
         }
-        
-        /* Top Status Bar */
-        .status-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 30px;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 15px;
-            z-index: 10;
-        }
-        
-        /* Application Title Bar */
-        .app-header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: clamp(50px, 10%, 80px);
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.6) 0%, rgba(118, 75, 162, 0.6) 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(16px, 4vw, 28px);
-            font-weight: 600;
-            letter-spacing: 1px;
-            z-index: 100;
-            box-shadow: 
-                0 8px 32px rgba(102, 126, 234, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
+
         /* Shader Container */
         #container {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
+            z-index: 1;
+        }
+
+        #glCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* ===========================================
+           IDLE AMBIENT STAGE (Visible when not active)
+           =========================================== */
+        .idle-ambient {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-            padding: 0;
-        }
-        
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
-            border-radius: 15px;
-            box-shadow: 
-                0 0 30px rgba(128, 0, 255, 0.5),
-                inset 0 0 20px rgba(255, 255, 255, 0.1);
-            border: none;
-            display: block;
-        }
-        
-        /* ===========================================
-           CONTROL PANEL & INPUTS
-           =========================================== */
-        
-        /* Control Panel */
-        .controls {
-            margin-top: 15px;
-            color: white;
-            max-height: 180px;
-            overflow-y: auto;
-            padding: 0 clamp(8px, 2vw, 16px);
-        }
-        
-        .control-group {
-            margin: clamp(6px, 1.5vw, 12px) 0;
-            display: block;
-            width: 100%;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: clamp(3px, 1vw, 8px);
-            color: #ccc;
-            font-size: clamp(11px, 2vw, 16px);
-            font-weight: 600;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: clamp(3px, 0.5vw, 6px);
-            border-radius: 2px;
-            background: rgba(255, 255, 255, 0.2);
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: clamp(12px, 2vw, 18px);
-            height: clamp(12px, 2vw, 18px);
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
-        }
-        
-        .value-display {
-            color: #9f6fff;
-            font-weight: 700;
-            font-size: clamp(10px, 1.8vw, 14px);
-        }
-        
-        /* ===========================================
-           BUTTON STYLES
-           =========================================== */        /* Bottom Left Settings Button */
-        .settings-gear-btn {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            width: auto;
-            height: auto;
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            box-shadow: none;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 998;
-            overflow: visible;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
-        
-        .settings-gear-btn:hover {
-            transform: scale(1.15);
-        }
-        
-        .settings-gear-btn:active {
-            transform: scale(0.95);
-        }
-        
-        /* Mobile Touch Feedback */
-        @media (hover: none) and (pointer: coarse) {
-            .settings-gear-btn:active {
-                transform: scale(0.98);
-            }
-        }
-
-        /* Remove Blue Border on Button Click */
-        button {
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
-        }
-
-        button:focus {
-            outline: none;
-        }
-
-        /* Gear SVG Styles */
-        .gear-svg {
-            width: 48px;
-            height: 48px;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
-            filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.6));
-        }
-
-        .settings-gear-btn:hover .gear-svg {
-            transform: rotate(-20deg);
-            filter: drop-shadow(0 0 16px rgba(102, 126, 234, 0.9)) drop-shadow(0 0 24px rgba(128, 0, 255, 0.6));
-        }
-
-        .settings-gear-btn:active .gear-svg {
-            transform: rotate(-30deg);
-            filter: drop-shadow(0 0 12px rgba(102, 126, 234, 0.7));
-        }
-        
-        /* Localization Button - Bottom Right */
-        .localization-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: auto;
-            height: auto;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: none;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 998;
-            overflow: visible;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            text-shadow: 0 0 8px rgba(102, 126, 234, 0.6);
-        }
-        
-        .localization-btn:hover {
-            transform: scale(1.15);
-            text-shadow: 0 0 16px rgba(102, 126, 234, 0.9), 0 0 24px rgba(128, 0, 255, 0.6);
-        }
-        
-        .localization-btn:active {
-            transform: scale(0.95);
-            text-shadow: 0 0 12px rgba(102, 126, 234, 0.7);
-        }
-        
-        /* Mobile Touch Feedback */
-        @media (hover: none) and (pointer: coarse) {
-            .localization-btn:active {
-                transform: scale(0.98);
-            }
-        }
-        
-        /* Localization Menu */
-        .localization-menu {
-            display: none;
-        }
-        
-        .localization-menu.active {
-            display: none;
-        }
-        
-        /* Start Hypnosis Button */
-        .hypnosis-btn {
-            position: fixed;
-            bottom: 20%;
-            left: 50%;
-            transform: translate(-50%, 50%);
-            width: 120px;   
-            height: 120px;  
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 4px solid rgba(255, 255, 255, 0.5);
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 
-                0 16px 50px rgba(102, 126, 234, 0.8),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                0 0 40px rgba(128, 0, 255, 0.5);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 999;
-            overflow: visible;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* ===========================================
-           RESPONSIVE DESIGN - HYPNOSIS BUTTON
-           =========================================== */
-        
-        /* Small Screen Devices (Mobile Portrait) */
-        @media screen and (max-width: 480px) {
-            .hypnosis-btn {
-                width: 100px;
-                height: 100px;
-                font-size: 14px;
-            }
-        }
-
-        /* Medium Screen Devices (Mobile Landscape/Small Tablet) */
-        @media screen and (min-width: 481px) and (max-width: 768px) {
-            .hypnosis-btn {
-                width: 120px;
-                height: 120px;
-                font-size: 16px;
-            }
-        }
-
-        /* Large Screen Devices (Tablet/Desktop) */
-        @media screen and (min-width: 769px) and (max-width: 1024px) {
-            .hypnosis-btn {
-                width: 140px;
-                height: 140px;
-                font-size: 18px;
-            }
-        }
-
-        /* Extra Large Screen Devices (Large Desktop) */
-        @media screen and (min-width: 1025px) {
-            .hypnosis-btn {
-                width: 160px;
-                height: 160px;
-                font-size: 20px;
-            }
-        }
-        
-        .hypnosis-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
             pointer-events: none;
-        }
-        
-        .hypnosis-btn:hover {
-            transform: translate(-50%, 50%) scale(1.1);
-            box-shadow: 
-                0 20px 60px rgba(102, 126, 234, 0.7),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4),
-                0 0 50px rgba(128, 0, 255, 0.5);
-        }
-        
-        .hypnosis-btn:active {
-            transform: translate(-50%, 50%) scale(0.95);
-            box-shadow: 
-                0 8px 25px rgba(102, 126, 234, 0.4),
-                inset 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* Mobile Touch Feedback */
-        @media (hover: none) and (pointer: coarse) {
-            .hypnosis-btn:active {
-                transform: translate(-50%, 50%) scale(0.98);
-            }
+            transition: opacity 0.6s var(--ease-spring), transform 0.6s var(--ease-spring);
         }
 
-        /* Forced Climax Button */
-        .climax-btn {
+        .app-shell.is-active .idle-ambient {
+            opacity: 0;
+            transform: scale(1.06);
+        }
+
+        .idle-nebula {
+            position: absolute;
+            width: min(82vw, 560px);
+            height: min(82vw, 560px);
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(168, 85, 247, 0.22) 0%,
+                rgba(124, 92, 255, 0.11) 38%,
+                rgba(56, 22, 130, 0.04) 68%,
+                transparent 100%
+            );
+            filter: blur(8px);
+            animation: idleBreath 5.5s ease-in-out infinite;
+        }
+
+        .idle-rings {
+            position: absolute;
+            width: min(92vw, 620px);
+            height: min(92vw, 620px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .idle-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(192, 132, 252, 0.11);
+        }
+
+        .idle-ring:nth-child(1) { width: 22%; height: 22%; border-color: rgba(192, 132, 252, 0.22); }
+        .idle-ring:nth-child(2) { width: 42%; height: 42%; border-color: rgba(192, 132, 252, 0.16); }
+        .idle-ring:nth-child(3) { width: 64%; height: 64%; border-color: rgba(192, 132, 252, 0.11); }
+        .idle-ring:nth-child(4) { width: 88%; height: 88%; border-color: rgba(192, 132, 252, 0.07); }
+
+        .idle-cue {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .idle-cue-title {
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.14em;
+            color: var(--text-secondary);
+        }
+
+        .idle-cue-sub {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        @keyframes idleBreath {
+            0%, 100% { transform: scale(0.96); opacity: 0.85; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* ===========================================
+           TOP FLOATING GLASS PILL
+           =========================================== */
+        .top-pill {
             position: fixed;
-            bottom: 5%;
+            top: max(22px, env(safe-area-inset-top, 22px));
             left: 50%;
             transform: translateX(-50%);
-            width: 180px;
-            height: 50px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            color: white;
+            z-index: 40;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            border-radius: var(--radius-pill);
+            background: var(--surface-glass);
+            border: 1px solid var(--border-glass);
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transition: opacity 0.45s var(--ease-spring), transform 0.45s var(--ease-spring), border-color 0.3s ease;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: background 0.35s ease, box-shadow 0.35s ease;
+            flex-shrink: 0;
+        }
+
+        .app-shell.is-active .status-dot {
+            background: var(--accent-climax);
+            box-shadow: 0 0 10px rgba(244, 114, 182, 0.9);
+            animation: dotPulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.55; transform: scale(0.85); }
+        }
+
+        .app-title {
             font-size: 14px;
             font-weight: 700;
-            cursor: pointer;
-            box-shadow: 
-                0 8px 25px rgba(102, 126, 234, 0.6),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                0 0 20px rgba(128, 0, 255, 0.4);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 998;
-            overflow: visible;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .pill-divider {
+            width: 1px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .status-text {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            transition: color 0.3s ease;
+        }
+
+        .app-shell.is-active .status-text {
+            color: var(--accent-secondary);
+        }
+
+        /* ===========================================
+           BOTTOM FLOATING GLASS DOCK & CLIMAX PILL
+           =========================================== */
+        .bottom-controls {
+            position: fixed;
+            bottom: max(26px, env(safe-area-inset-bottom, 26px));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 40;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            transition: transform 0.45s var(--ease-spring);
+        }
+
+        /* Climax Pulse Pill */
+        .climax-btn {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
+            height: 42px;
+            padding: 0 22px;
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(255, 217, 237, 0.38);
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.8) 0%, rgba(147, 51, 234, 0.8) 100%);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            box-shadow: 0 8px 26px rgba(244, 114, 182, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.25);
             opacity: 0;
+            transform: translateY(14px) scale(0.92);
             pointer-events: none;
+            transition: opacity 0.35s var(--ease-spring), transform 0.35s var(--ease-bounce), box-shadow 0.3s ease;
         }
 
-        /* Small Screen Devices (Mobile Portrait) */
-        @media screen and (max-width: 480px) {
-            .climax-btn {
-                width: 140px;
-                height: 40px;
-                font-size: 12px;
-            }
-        }
-
-        /* Medium Screen Devices (Mobile Landscape/Small Tablet) */
-        @media screen and (min-width: 481px) and (max-width: 768px) {
-            .climax-btn {
-                width: 160px;
-                height: 45px;
-                font-size: 13px;
-            }
-        }
-
-        /* Large Screen Devices (Tablet/Desktop) */
-        @media screen and (min-width: 769px) and (max-width: 1024px) {
-            .climax-btn {
-                width: 180px;
-                height: 50px;
-                font-size: 14px;
-            }
-        }
-
-        /* Extra Large Screen Devices (Large Desktop) */
-        @media screen and (min-width: 1025px) {
-            .climax-btn {
-                width: 200px;
-                height: 55px;
-                font-size: 15px;
-            }
-        }
-
-        /* Button Display State (When Hypnosis is Active) */
         .climax-btn.active {
             opacity: 1;
-            pointer-events: all;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
         }
 
         .climax-btn:hover {
-            transform: translateX(-50%) scale(1.08);
-            box-shadow: 
-                0 12px 35px rgba(102, 126, 234, 0.8),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4),
-                0 0 30px rgba(128, 0, 255, 0.6);
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 12px 34px rgba(244, 114, 182, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.35);
         }
 
         .climax-btn:active {
-            transform: translateX(-50%) scale(0.95);
-            box-shadow: 
-                0 4px 15px rgba(102, 126, 234, 0.4),
-                inset 0 2px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(0) scale(0.96);
         }
 
-        /* Mobile Touch Feedback */
-        @media (hover: none) and (pointer: coarse) {
-            .climax-btn:active {
-                transform: translateX(-50%) scale(0.97);
-            }
-        }
-        
-        /* ===========================================
-           ANIMATIONS & EFFECTS
-           =========================================== */
-        
-        /* Start Hypnosis Button Animation */
-        @keyframes hypnosisActivate {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, 50%) scale(1.2);
-            }
-            100% {
-                opacity: 1;
-                transform: translate(-50%, 50%) scale(1);
-            }
-        }
-        
-        .hypnosis-btn.activating {
-            animation: hypnosisActivate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        .climax-btn.pulsing {
+            animation: climaxPulse 0.58s var(--ease-bounce);
         }
 
-        /* Forced Climax Pulse Animation */
         @keyframes climaxPulse {
-            0% {
-                transform: translateX(-50%) scale(1);
-                box-shadow: 
-                    0 12px 35px rgba(102, 126, 234, 0.6),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                    0 0 30px rgba(128, 0, 255, 0.4);
-            }
-            50% {
-                transform: translateX(-50%) scale(1.25);
-                box-shadow: 
-                    0 25px 70px rgba(102, 126, 234, 0.9),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-                    0 0 80px rgba(128, 0, 255, 0.8);
-            }
-            100% {
-                transform: translateX(-50%) scale(1);
-                box-shadow: 
-                    0 12px 35px rgba(102, 126, 234, 0.6),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                    0 0 30px rgba(128, 0, 255, 0.4);
-            }
+            0% { transform: scale(1); box-shadow: 0 8px 26px rgba(244, 114, 182, 0.45); }
+            45% { transform: scale(1.14); box-shadow: 0 16px 48px rgba(244, 114, 182, 0.88), 0 0 36px rgba(192, 132, 252, 0.7); }
+            100% { transform: scale(1); box-shadow: 0 8px 26px rgba(244, 114, 182, 0.45); }
         }
-        
-        /* Custom Scrollbar */
-        .controls::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .controls::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-        }
-        
-        .controls::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.6);
-            border-radius: 2px;
-        }
-        
-        /* ===========================================
-           MODAL & DIALOGS
-           =========================================== */
-        
-        /* Floating Settings Menu */
-        .settings-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: clamp(280px, 90vw, 500px);
-            max-height: clamp(400px, 80vh, 800px);
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 2px solid rgba(102, 126, 234, 0.5);
-            border-radius: clamp(16px, 3vw, 28px);
-            box-shadow: 
-                0 0 40px rgba(102, 126, 234, 0.4),
-                0 0 80px rgba(128, 0, 255, 0.25),
-                0 20px 60px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            backdrop-filter: blur(15px);
-            animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            overflow: hidden;
-        }
-        
-        .settings-modal.active {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: clamp(12px, 3vw, 24px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            flex-shrink: 0;
-        }
-        
-        .modal-header h2 {
-            margin: 0;
-            font-size: clamp(16px, 3vw, 24px);
-            font-weight: 700;
-        }
-        
-        .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: clamp(18px, 3vw, 28px);
-            cursor: pointer;
-            padding: 0;
-            width: clamp(28px, 5vw, 40px);
-            height: clamp(28px, 5vw, 40px);
+
+        /* Main Dock Row */
+        .dock-row {
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border-radius: 50%;
+            gap: 14px;
         }
-        
-        .close-btn:hover {
-            transform: scale(1.15) rotate(90deg);
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+
+        /* Circular Glass Icon Buttons (Settings & Language) */
+        .glass-circle-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border-glass);
+            background: var(--surface-glass);
+            color: var(--text-primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transition: opacity 0.4s var(--ease-spring), transform 0.3s var(--ease-bounce), background 0.25s ease, border-color 0.25s ease;
         }
-        
-        .modal-content {
-            overflow-y: auto;
-            padding: clamp(12px, 3vw, 24px);
-            flex: 1;
+
+        .glass-circle-btn:hover {
+            background: var(--surface-glass-hover);
+            border-color: var(--border-glass-strong);
+            transform: translateY(-2px) scale(1.06);
         }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -45%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
+
+        .glass-circle-btn:active {
+            transform: scale(0.94);
         }
-        
-        /* Semi-transparent Background */
-        .modal-overlay {
+
+        .glass-circle-btn .gear-icon {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.4s var(--ease-bounce);
+        }
+
+        .glass-circle-btn:hover .gear-icon {
+            transform: rotate(35deg);
+        }
+
+        .app-shell.settings-open .settings-btn {
+            border-color: var(--border-accent);
+            background: rgba(124, 92, 255, 0.22);
+        }
+
+        .lang-quick-btn {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        /* Primary Hypnosis Pill */
+        .hypnosis-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            height: 52px;
+            min-width: 156px;
+            padding: 0 26px;
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(124, 92, 255, 0.94) 0%, rgba(168, 85, 247, 0.9) 100%);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 12px 32px rgba(124, 92, 255, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.35s var(--ease-spring);
+            white-space: nowrap;
+        }
+
+        .hypnosis-btn:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 16px 40px rgba(124, 92, 255, 0.68), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .hypnosis-btn:active {
+            transform: scale(0.96);
+        }
+
+        .hypnosis-btn .icon-stop {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            backdrop-filter: blur(3px);
+            width: 10px;
+            height: 10px;
+            border-radius: 2.5px;
+            background: var(--accent-secondary);
+            flex-shrink: 0;
         }
-        
-        .modal-overlay.active {
-            display: block;
+
+        .hypnosis-btn .icon-start {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        /* Active state: sleek low-distraction translucent glass pill */
+        .app-shell.is-active .hypnosis-btn {
+            height: 46px;
+            min-width: 138px;
+            padding: 0 22px;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--surface-glass);
+            border-color: var(--border-accent);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .app-shell.is-active .hypnosis-btn .icon-start {
+            display: none;
+        }
+
+        .app-shell.is-active .hypnosis-btn .icon-stop {
+            display: inline-block;
+        }
+
+        /* Immersive Hint */
+        .immersive-hint {
+            font-size: 11px;
+            color: var(--text-secondary);
+            letter-spacing: 0.04em;
+            opacity: 0;
+            transform: translateY(4px);
+            pointer-events: none;
+            transition: opacity 0.5s var(--ease-spring), transform 0.5s var(--ease-spring);
+            white-space: nowrap;
+        }
+
+        .app-shell.is-active:not(.settings-open) .immersive-hint {
+            opacity: 0.42;
+            transform: translateY(0);
+        }
+
+        /* ===========================================
+           IMMERSIVE MODE DIMMING (Active & Settings Closed)
+           =========================================== */
+        .app-shell.is-active:not(.settings-open) .top-pill {
+            opacity: 0.34;
+            transform: translateX(-50%) scale(0.96);
+        }
+
+        .app-shell.is-active:not(.settings-open) .top-pill:hover {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .app-shell.is-active:not(.settings-open) .glass-circle-btn {
+            opacity: 0.28;
+        }
+
+        .app-shell.is-active:not(.settings-open) .glass-circle-btn:hover,
+        .app-shell.is-active:not(.settings-open) .glass-circle-btn:focus-visible {
+            opacity: 1;
+        }
+
+        .app-shell.is-active:not(.settings-open) .hypnosis-btn {
+            opacity: 0.72;
+        }
+
+        .app-shell.is-active:not(.settings-open) .hypnosis-btn:hover {
+            opacity: 1;
+        }
+
+        /* Desktop shift when right drawer is open */
+        @media (min-width: 768px) {
+            .app-shell.settings-open .top-pill,
+            .app-shell.settings-open .bottom-controls {
+                left: calc(50% - 196px);
+            }
+        }
+
+        /* ===========================================
+           GLASS SETTINGS DRAWER (Mobile Sheet / Desktop Side Card)
+           =========================================== */
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(5, 5, 10, 0.52);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s var(--ease-spring);
+        }
+
+        .drawer-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (min-width: 768px) {
+            /* On desktop keep backdrop subtle so user sees WebGL changes live */
+            .drawer-overlay {
+                background: rgba(5, 5, 10, 0.16);
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+            }
+        }
+
+        .settings-drawer {
+            position: fixed;
+            z-index: 60;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            max-height: 84dvh;
+            display: flex;
+            flex-direction: column;
+            border-radius: var(--radius-drawer) var(--radius-drawer) 0 0;
+            background: var(--surface-glass-elevated);
+            border: 1px solid var(--border-glass);
+            border-bottom: none;
+            backdrop-filter: blur(36px) saturate(180%);
+            -webkit-backdrop-filter: blur(36px) saturate(180%);
+            box-shadow: 0 -14px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            transform: translateY(105%);
+            pointer-events: none;
+            transition: transform 0.42s var(--ease-spring);
+            overflow: hidden;
+        }
+
+        .settings-drawer.active {
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .drawer-handle-wrap {
+            display: flex;
+            justify-content: center;
+            padding: 12px 0 4px;
+            flex-shrink: 0;
+        }
+
+        .drawer-handle {
+            width: 38px;
+            height: 4px;
+            border-radius: var(--radius-pill);
+            background: rgba(255, 255, 255, 0.24);
+        }
+
+        @media (min-width: 768px) {
+            .settings-drawer {
+                left: auto;
+                top: 24px;
+                right: 24px;
+                bottom: 24px;
+                width: 368px;
+                max-height: none;
+                border-radius: 24px;
+                border-bottom: 1px solid var(--border-glass);
+                box-shadow: -14px 0 48px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+                transform: translateX(calc(100% + 40px));
+            }
+
+            .settings-drawer.active {
+                transform: translateX(0);
+            }
+
+            .drawer-handle-wrap {
+                display: none;
+            }
+        }
+
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px 12px;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .drawer-header {
+                padding: 22px 24px 14px;
+            }
+        }
+
+        .drawer-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border-glass);
+            background: var(--surface-glass-subtle);
+            color: var(--text-primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.25s var(--ease-bounce), background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: var(--border-glass-strong);
+            transform: rotate(90deg) scale(1.06);
+        }
+
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 24px max(24px, env(safe-area-inset-bottom, 24px));
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .drawer-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        .drawer-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .drawer-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.16);
+            border-radius: 99px;
+        }
+
+        /* ===========================================
+           SLIDER ROWS (Custom Glassmorphic Sliders)
+           =========================================== */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .control-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .control-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .value-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 9px;
+            border-radius: var(--radius-pill);
+            background: var(--surface-glass-subtle);
+            border: 1px solid var(--border-glass);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--accent-secondary);
+            white-space: nowrap;
+        }
+
+        .value-badge.has-cjk {
+            font-family: var(--font-sans);
+        }
+
+        input[type="range"] {
+            --fill-pct: 50%;
+            width: 100%;
+            height: 5px;
+            margin: 5px 0;
+            border-radius: var(--radius-pill);
+            background: linear-gradient(
+                90deg,
+                var(--accent-primary) 0%,
+                var(--accent-secondary) var(--fill-pct),
+                rgba(255, 255, 255, 0.14) var(--fill-pct),
+                rgba(255, 255, 255, 0.14) 100%
+            );
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fafaff;
+            border: 2px solid var(--accent-primary);
+            box-shadow: 0 0 12px rgba(124, 92, 255, 0.78);
+            cursor: pointer;
+            transition: transform 0.2s var(--ease-bounce), box-shadow 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.18);
+            box-shadow: 0 0 16px rgba(192, 132, 252, 0.95);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fafaff;
+            border: 2px solid var(--accent-primary);
+            box-shadow: 0 0 12px rgba(124, 92, 255, 0.78);
+            cursor: pointer;
+        }
+
+        .drawer-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 2px 0;
+        }
+
+        /* ===========================================
+           SEGMENTED LANGUAGE CONTROL
+           =========================================== */
+        .lang-section-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .lang-segmented {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            padding: 4px;
+            border-radius: var(--radius-control);
+            background: var(--surface-glass-subtle);
+            border: 1px solid var(--border-glass);
+        }
+
+        .lang-seg-btn {
+            padding: 8px 6px;
+            border-radius: 9px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s var(--ease-spring);
+        }
+
+        .lang-seg-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .lang-seg-btn.active {
+            background: var(--accent-primary);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: var(--text-primary);
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(124, 92, 255, 0.45);
+        }
+
+        /* ===========================================
+           RESET GHOST BUTTON
+           =========================================== */
+        .reset-btn {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius-control);
+            border: 1px solid var(--danger-border);
+            background: var(--danger-bg);
+            color: var(--danger-base);
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s var(--ease-bounce);
+        }
+
+        .reset-btn:hover {
+            background: rgba(251, 113, 133, 0.2);
+            border-color: rgba(251, 113, 133, 0.55);
+        }
+
+        .reset-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ===========================================
+           GLASS TOAST NOTIFICATION
+           =========================================== */
+        .toast {
+            position: fixed;
+            top: 82px;
+            left: 50%;
+            transform: translate(-50%, -12px);
+            z-index: 90;
+            padding: 10px 18px;
+            border-radius: var(--radius-pill);
+            background: var(--surface-glass-elevated);
+            border: 1px solid var(--border-accent);
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 500;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--ease-spring), transform 0.3s var(--ease-spring);
+            white-space: nowrap;
+        }
+
+        .toast.visible {
+            opacity: 1;
+            transform: translate(-50%, 0);
         }
     </style>
 </head>
 <body>
-    <div class="phone-screen">
-            
-            <!-- Application Title Bar -->
-            <div class="app-header">
-                催眠APP
-            </div>
-            
-            <!-- Main Content Area -->
-            <div id="container">
-                <canvas id="glCanvas" width="500" height="500"></canvas>
-            </div>
-            
-            <!-- Modal Background -->
-            <div id="modalOverlay" class="modal-overlay" onclick="closeSettings()"></div>
-            
-            <!-- Bottom Left Settings Button -->
-            <button class="settings-gear-btn" onclick="toggleSettings()" title="设置">
-                <svg class="gear-svg" viewBox="0 0 200 200">
-                    <defs>
-                        <linearGradient id="gearGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#764ba2;stop-opacity:1" />
-                            <stop offset="50%" style="stop-color:#667eea;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#a78bfa;stop-opacity:1" />
-                        </linearGradient>
-                        <filter id="gearGlow">
-                            <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
-                            <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                            </feMerge>
-                        </filter>
-                    </defs>
-                    
-                    <!-- 16 Gear Teeth -->
-                    <g fill="url(#gearGradient)" filter="url(#gearGlow)">
-                        <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        <g transform="rotate(22.5 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Upper Right Offset -->
-                        <g transform="rotate(45 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Right -->
-                        <g transform="rotate(67.5 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Lower Right Offset -->
-                        <g transform="rotate(90 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Lower Right -->
-                        <g transform="rotate(112.5 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Lower Right Offset -->
-                        <g transform="rotate(135 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Down -->
-                        <g transform="rotate(157.5 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Lower Left Offset -->
-                        <g transform="rotate(180 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Lower Left -->
-                        <g transform="rotate(202.5 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Left Offset -->
-                        <g transform="rotate(225 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Upper Left Offset -->
-                        <g transform="rotate(247.5 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Left -->
-                        <g transform="rotate(270 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Upper Left -->
-                        <g transform="rotate(292.5 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Upper Left Offset -->
-                        <g transform="rotate(315 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        <!-- Upper Offset -->
-                        <g transform="rotate(337.5 100 100)">
-                            <rect x="92" y="20" width="16" height="18" rx="2"/>
-                        </g>
-                        
-                        <!-- Gear Main Disk -->
-                        <circle cx="100" cy="100" r="55" fill="url(#gearGradient)"/>
-                    </g>
-                    
-                    <!-- Center Hole -->
-                    <circle cx="100" cy="100" r="20" fill="#1a1a2e"/>
-                    
-                    <!-- Center Decorative Ring -->
-                    <circle cx="100" cy="100" r="20" fill="none" stroke="#667eea" stroke-width="2.5"/>
-                    
-                    <!-- Center Bright Spot -->
-                    <circle cx="100" cy="100" r="12" fill="none" stroke="white" stroke-width="1" opacity="0.5"/>
-                    
-                    <!-- Center Dot -->
-                    <circle cx="100" cy="100" r="4" fill="#a78bfa"/>
-                </svg>
-            </button>
-            
-            <!-- Floating Menu -->
-            <div id="settingsModal" class="settings-modal">
-                <div class="modal-header">
-                    <h2>⚙️ 设置</h2>
-                    <button class="close-btn" onclick="closeSettings()">✕</button>
-                </div>
-                <div class="modal-content">
-                    <div class="control-group">
-                        <label>螺旋臂: <span class="value-display" id="armsValue">6.0</span></label>
-                        <input type="range" id="spiralArms" min="1" max="8" step="1.0" value="6.0">
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>间距: <span class="value-display" id="spacingValue">4.0</span></label>
-                        <input type="range" id="spiralSpacing" min="1" max="8" step="0.1" value="4.0">
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>螺旋强度: <span class="value-display" id="spiralGlowValue">0.02</span></label>
-                        <input type="range" id="spiralGlow" min="0.01" max="1" step="0.01" value="0.02">
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>光环强度: <span class="value-display" id="rippleGlowValue">1.0</span></label>
-                        <input type="range" id="rippleGlow" min="0.1" max="3" step="0.1" value="1.0">
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>光环速度: <span class="value-display" id="rippleSpeedValue">4.0</span></label>
-                        <input type="range" id="rippleSpeed" min="-10" max="10" step="0.1" value="4.0">
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>速度: <span class="value-display" id="speedValue">2.0</span></label>
-                        <input type="range" id="rotationSpeed" min="0" max="6" step="0.1" value="2.0">
-                    </div>
-                    
-                    <div class="control-group" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
-                        <label>语言: <span class="value-display" id="languageDisplay">日本語</span></label>
-                        <div style="display: flex; gap: 8px; margin-top: 8px;">
-                            <button onclick="switchLanguage('ja')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 6px; color: white; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.3s;">
-                                日本語
-                            </button>
-                            <button onclick="switchLanguage('en')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 6px; color: white; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.3s;">
-                                English
-                            </button>
-                            <button onclick="switchLanguage('zh')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 6px; color: white; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.3s;">
-                                中文
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="control-group" style="margin-top: 15px;">
-                        <button onclick="resetAllSettings()" style="width: 100%; padding: 10px; background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%); border: none; border-radius: 8px; color: white; font-weight: 700; cursor: pointer; font-size: 14px; transition: all 0.3s;">
-                            🔄 重置所有设置
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Start Hypnosis Button -->
-            <button class="hypnosis-btn" onclick="toggleHypnosis()" id="hypnosisBtn">催眠を開始</button>
-            
-            <!-- Forced Climax Button -->
-            <button class="climax-btn" onclick="triggerClimaxEffect()" title="強制オルガスム" id="climaxBtn">強制オルガスム</button>
+    <div id="appShell" class="app-shell">
+        <!-- WebGL Full-Bleed Canvas -->
+        <div id="container">
+            <canvas id="glCanvas"></canvas>
         </div>
+
+        <!-- Subtle Idle Ambient Stage -->
+        <div class="idle-ambient" aria-hidden="true">
+            <div class="idle-nebula"></div>
+            <div class="idle-rings">
+                <div class="idle-ring"></div>
+                <div class="idle-ring"></div>
+                <div class="idle-ring"></div>
+                <div class="idle-ring"></div>
+            </div>
+            <div class="idle-cue">
+                <div class="idle-cue-title" id="idleCueTitle">沉浸视觉引擎就绪</div>
+                <div class="idle-cue-sub">WEBGL GOLDEN RATIO SPIRAL</div>
+            </div>
+        </div>
+
+        <!-- Top Floating Glass Pill -->
+        <header class="top-pill">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span class="app-title" id="appTitle">催眠APP</span>
+            <span class="pill-divider" aria-hidden="true"></span>
+            <span class="status-text" id="statusText">待机中</span>
+        </header>
+
+        <!-- Bottom Floating Glass Dock -->
+        <div class="bottom-controls">
+            <!-- Forced Climax Pill -->
+            <button class="climax-btn" onclick="triggerClimaxEffect()" id="climaxBtn" type="button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span id="climaxBtnText">強制絶頂</span>
+            </button>
+
+            <!-- Dock Row -->
+            <div class="dock-row">
+                <button class="glass-circle-btn settings-btn" onclick="toggleSettings()" id="settingsBtn" type="button" title="设置" aria-label="Settings">
+                    <svg class="gear-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+
+                <button class="hypnosis-btn" onclick="toggleHypnosis()" id="hypnosisBtn" type="button">
+                    <svg class="icon-start" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9Z" stroke="currentColor" stroke-width="1.8"/>
+                        <path d="M12 7a5 5 0 1 0 5 5 5 5 0 0 0-5-5Z" stroke="currentColor" stroke-width="1.6" stroke-opacity="0.75"/>
+                        <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    </svg>
+                    <span class="icon-stop" aria-hidden="true"></span>
+                    <span id="hypnosisBtnText">催眠開始</span>
+                </button>
+
+                <button class="glass-circle-btn lang-quick-btn" onclick="cycleLanguage()" id="langQuickBtn" type="button" title="切换语言" aria-label="Switch Language">日</button>
+            </div>
+
+            <div class="immersive-hint" id="immersiveHint">沉浸模式已开启 · 边缘控件已自动弱化</div>
+        </div>
+
+        <!-- Drawer Backdrop -->
+        <div id="modalOverlay" class="drawer-overlay" onclick="closeSettings()"></div>
+
+        <!-- Responsive Glass Settings Drawer -->
+        <aside id="settingsModal" class="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="drawer-handle-wrap" aria-hidden="true">
+                <div class="drawer-handle"></div>
+            </div>
+            <div class="drawer-header">
+                <h2 id="settingsTitle">参数设置</h2>
+                <button class="close-btn" onclick="closeSettings()" type="button" aria-label="Close">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="drawer-body">
+                <div class="control-group">
+                    <div class="control-header">
+                        <label class="control-label" for="spiralArms" id="lblSpiralArms">螺旋臂</label>
+                        <span class="value-badge" id="armsValue">6.0</span>
+                    </div>
+                    <input type="range" id="spiralArms" min="1" max="8" step="1.0" value="6.0">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <label class="control-label" for="spiralSpacing" id="lblSpacing">间距</label>
+                        <span class="value-badge" id="spacingValue">4.0</span>
+                    </div>
+                    <input type="range" id="spiralSpacing" min="1" max="8" step="0.1" value="4.0">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <label class="control-label" for="spiralGlow" id="lblSpiralGlow">螺旋强度</label>
+                        <span class="value-badge" id="spiralGlowValue">0.02</span>
+                    </div>
+                    <input type="range" id="spiralGlow" min="0.01" max="1" step="0.01" value="0.02">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <label class="control-label" for="rippleGlow" id="lblRippleGlow">光环强度</label>
+                        <span class="value-badge" id="rippleGlowValue">1.0</span>
+                    </div>
+                    <input type="range" id="rippleGlow" min="0.1" max="3" step="0.1" value="1.0">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <label class="control-label" for="rippleSpeed" id="lblRippleSpeed">光环速度</label>
+                        <span class="value-badge has-cjk" id="rippleSpeedValue">4.0 · 扩散</span>
+                    </div>
+                    <input type="range" id="rippleSpeed" min="-10" max="10" step="0.1" value="4.0">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header">
+                        <label class="control-label" for="rotationSpeed" id="lblSpeed">旋转速度</label>
+                        <span class="value-badge" id="speedValue">2.0</span>
+                    </div>
+                    <input type="range" id="rotationSpeed" min="0" max="6" step="0.1" value="2.0">
+                </div>
+
+                <div class="drawer-divider"></div>
+
+                <div class="control-group">
+                    <span class="lang-section-label" id="lblLanguage">界面语言</span>
+                    <div class="lang-segmented" role="group" aria-label="Language">
+                        <button class="lang-seg-btn" data-lang="ja" onclick="switchLanguage('ja')" type="button">日本語</button>
+                        <button class="lang-seg-btn" data-lang="en" onclick="switchLanguage('en')" type="button">English</button>
+                        <button class="lang-seg-btn" data-lang="zh" onclick="switchLanguage('zh')" type="button">中文</button>
+                    </div>
+                </div>
+
+                <button class="reset-btn" onclick="resetAllSettings()" type="button">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M3 12a9 9 0 1 0 3-6.7L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3 3v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span id="resetBtnText">重置所有设置</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Glass Toast -->
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
     </div>
 
     <script>
         /* ================================================================
            LOCALIZATION SYSTEM
            ================================================================ */
-        
-        // Localization system
         const translations = {
             ja: {
                 appTitle: '催眠APP',
-                settings: '⚙️ 設定',
+                statusIdle: '待機中',
+                statusActive: '没入モード',
+                idleCue: '没入ビジュアルエンジン準備完了',
+                immersiveHint: '没入モード中 · 端のコントロールは自動で薄くなります',
+                settings: 'パラメータ設定',
                 startHypnosis: '催眠開始',
                 endHypnosis: '催眠終了',
                 climax: '強制絶頂',
-                resetAll: '🔄 すべての設定をリセット',
-                spiralArms: 'スパイラルアーム:',
-                spacing: '間隔:',
-                spiralIntensity: 'スパイラル強度:',
-                rippleIntensity: '波紋強度:',
-                rippleSpeed: '波紋速度:',
-                speed: '速度:',
-                language: '言語'
+                resetAll: 'すべての設定をリセット',
+                spiralArms: 'スパイラルアーム',
+                spacing: '間隔',
+                spiralIntensity: 'スパイラル強度',
+                rippleIntensity: '波紋強度',
+                rippleSpeed: '波紋速度',
+                speed: '回転速度',
+                language: '表示言語',
+                quickLang: '日',
+                dirExpand: '拡大',
+                dirContract: '収縮',
+                dirStatic: '静止',
+                needStart: '先に催眠を開始してください',
+                resetDone: 'すべての設定をリセットしました'
             },
             en: {
                 appTitle: 'Hypnosis APP',
-                settings: '⚙️ Settings',
+                statusIdle: 'Idle',
+                statusActive: 'Immersive',
+                idleCue: 'Immersive Visual Engine Ready',
+                immersiveHint: 'Immersive mode · Edge controls auto-dimmed',
+                settings: 'Parameters',
                 startHypnosis: 'Start Hypnosis',
                 endHypnosis: 'End Hypnosis',
                 climax: 'Forced Climax',
-                resetAll: '🔄 Reset All Settings',
-                spiralArms: 'Spiral Arms:',
-                spacing: 'Spacing:',
-                spiralIntensity: 'Spiral Intensity:',
-                rippleIntensity: 'Ripple Intensity:',
-                rippleSpeed: 'Ripple Speed:',
-                speed: 'Speed:',
-                language: 'Language'
+                resetAll: 'Reset All Settings',
+                spiralArms: 'Spiral Arms',
+                spacing: 'Spacing',
+                spiralIntensity: 'Spiral Intensity',
+                rippleIntensity: 'Ripple Intensity',
+                rippleSpeed: 'Ripple Speed',
+                speed: 'Rotation Speed',
+                language: 'Language',
+                quickLang: 'EN',
+                dirExpand: 'Out',
+                dirContract: 'In',
+                dirStatic: 'Still',
+                needStart: 'Please start hypnosis first',
+                resetDone: 'All settings have been reset'
             },
             zh: {
                 appTitle: '催眠APP',
-                settings: '⚙️ 设置',
+                statusIdle: '待机中',
+                statusActive: '沉浸模式',
+                idleCue: '沉浸视觉引擎就绪',
+                immersiveHint: '沉浸模式已开启 · 边缘控件已自动弱化',
+                settings: '参数设置',
                 startHypnosis: '开始催眠',
                 endHypnosis: '结束催眠',
                 climax: '强制高潮',
-                resetAll: '🔄 重置所有设置',
-                spiralArms: '螺旋臂:',
-                spacing: '间距:',
-                spiralIntensity: '螺旋强度:',
-                rippleIntensity: '光环强度:',
-                rippleSpeed: '光环速度:',
-                speed: '速度:',
-                language: '语言'
+                resetAll: '重置所有设置',
+                spiralArms: '螺旋臂',
+                spacing: '间距',
+                spiralIntensity: '螺旋强度',
+                rippleIntensity: '光环强度',
+                rippleSpeed: '光环速度',
+                speed: '旋转速度',
+                language: '界面语言',
+                quickLang: '中',
+                dirExpand: '扩散',
+                dirContract: '收缩',
+                dirStatic: '静止',
+                needStart: '请先开始催眠',
+                resetDone: '所有设置已重置'
             }
         };
-        
-        let currentLanguage = 'ja'; // Default language is Japanese
-        
-        // Update UI text based on current language
+
+        const langOrder = ['ja', 'en', 'zh'];
+        let currentLanguage = 'ja';
+        let toastTimer = null;
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('visible');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('visible');
+            }, 2200);
+        }
+
+        function formatRippleSpeed(val) {
+            const t = translations[currentLanguage];
+            const dir = val > 0 ? t.dirExpand : val < 0 ? t.dirContract : t.dirStatic;
+            return `${val.toFixed(1)} · ${dir}`;
+        }
+
         function updateLanguage() {
             const t = translations[currentLanguage];
-            
-            // Update app header
-            const appHeader = document.querySelector('.app-header');
-            if (appHeader) appHeader.textContent = t.appTitle;
-            
-            // Update settings modal title
-            const settingsTitle = document.querySelector('.modal-header h2');
-            if (settingsTitle) settingsTitle.textContent = t.settings;
-            
-            // Update buttons
-            const hypnosisBtn = document.getElementById('hypnosisBtn');
-            const climaxBtn = document.getElementById('climaxBtn');
-            if (hypnosisBtn) hypnosisBtn.textContent = isHypnosisActive ? t.endHypnosis : t.startHypnosis;
-            if (climaxBtn) climaxBtn.textContent = t.climax;
-            
-            // Update language display in settings
-            const languageNames = { ja: '日本語', en: 'English', zh: '中文' };
-            const languageDisplay = document.getElementById('languageDisplay');
-            if (languageDisplay) languageDisplay.textContent = languageNames[currentLanguage] || '日本語';
-            
-            // Update control labels
-            const labels = document.querySelectorAll('.control-group label');
-            const labelTexts = [t.spiralArms, t.spacing, t.spiralIntensity, t.rippleIntensity, t.rippleSpeed, t.speed, t.language];
-            labels.forEach((label, index) => {
-                if (index < labelTexts.length && index !== 6) { // Skip language label (it's handled separately)
-                    const valueSpan = label.querySelector('.value-display');
-                    const currentValue = valueSpan ? valueSpan.textContent : '';
-                    label.innerHTML = `${labelTexts[index]} <span class="value-display">${currentValue}</span>`;
-                }
+            document.title = t.appTitle;
+
+            document.getElementById('appTitle').textContent = t.appTitle;
+            document.getElementById('statusText').textContent = isHypnosisActive ? t.statusActive : t.statusIdle;
+            document.getElementById('idleCueTitle').textContent = t.idleCue;
+            document.getElementById('immersiveHint').textContent = t.immersiveHint;
+            document.getElementById('settingsTitle').textContent = t.settings;
+            document.getElementById('hypnosisBtnText').textContent = isHypnosisActive ? t.endHypnosis : t.startHypnosis;
+            document.getElementById('climaxBtnText').textContent = t.climax;
+            document.getElementById('resetBtnText').textContent = t.resetAll;
+            document.getElementById('langQuickBtn').textContent = t.quickLang;
+
+            document.getElementById('lblSpiralArms').textContent = t.spiralArms;
+            document.getElementById('lblSpacing').textContent = t.spacing;
+            document.getElementById('lblSpiralGlow').textContent = t.spiralIntensity;
+            document.getElementById('lblRippleGlow').textContent = t.rippleIntensity;
+            document.getElementById('lblRippleSpeed').textContent = t.rippleSpeed;
+            document.getElementById('lblSpeed').textContent = t.speed;
+            document.getElementById('lblLanguage').textContent = t.language;
+
+            // Keep ripple direction localized
+            const rippleValEl = document.getElementById('rippleSpeedValue');
+            if (rippleValEl) rippleValEl.textContent = formatRippleSpeed(rippleSpeed);
+
+            // Sync segmented language buttons
+            document.querySelectorAll('.lang-seg-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === currentLanguage);
             });
-            
-            // Update reset button
-            const resetBtn = document.querySelector('[onclick="resetAllSettings()"]');
-            if (resetBtn) resetBtn.textContent = t.resetAll;
-            
-            // Save language preference
+
             try {
                 localStorage.setItem('preferredLanguage', currentLanguage);
             } catch (e) {
                 console.warn('Failed to save language preference:', e);
             }
         }
-        
-        // Switch to a different language
+
         window.switchLanguage = function(lang) {
             if (translations[lang]) {
                 currentLanguage = lang;
                 updateLanguage();
             }
         };
-        
-        // Load saved language preference on page load
+
+        window.cycleLanguage = function() {
+            const nextIdx = (langOrder.indexOf(currentLanguage) + 1) % langOrder.length;
+            switchLanguage(langOrder[nextIdx]);
+        };
+
         function loadLanguagePreference() {
             try {
                 const saved = localStorage.getItem('preferredLanguage');
@@ -943,21 +1168,10 @@
             }
             updateLanguage();
         }
-        
-        // Global error handling
-        window.addEventListener('error', function(event) {
-            console.error('❌ JavaScript error:', event.message);
-            console.error('File:', event.filename);
-            console.error('Line number:', event.lineno);
-            console.error('Column number:', event.colno);
-            console.error('Full error:', event.error);
-        });
-        
+
         /* ================================================================
            WEBGL INITIALIZATION & SHADERS
            ================================================================ */
-        
-        // Vertex shader
         const vertexShaderSource = `
             attribute vec4 aVertexPosition;
             void main() {
@@ -965,7 +1179,6 @@
             }
         `;
 
-        // Fragment shader
         const fragmentShaderSource = `
             #ifdef GL_ES
             precision mediump float;
@@ -986,48 +1199,42 @@
             void main() {
                 vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
                 float d = length(uv);
-                
+
                 float goldenRatio = 1.618033988749895;
                 float spiralAngle = u_time * u_rotationSpeed;
                 vec3 spiralColor = vec3(2.0, 0.5, 3.0);
-                
                 vec3 rippleColor = vec3(1.5, 0.3, 2.5);
-                
                 vec3 climaxColor = vec3(1.0, 0.4, 0.8);
-                
+
                 float angle = atan(uv.y, uv.x);
-                float goldenSpacing = pow(goldenRatio, d * u_spiralSpacing); 
+                float goldenSpacing = pow(goldenRatio, d * u_spiralSpacing);
                 float goldenSpiral = angle * u_spiralArms * 0.5 + goldenSpacing - spiralAngle;
-                float spiralPattern = sin(goldenSpiral);
-                spiralPattern = abs(spiralPattern);
+                float spiralPattern = abs(sin(goldenSpiral));
                 float spiralIntensity = (0.4 / spiralPattern) * u_spiralGlow;
-                
-                float ripple = sin(d * 10.0 - u_time * u_rippleSpeed) / 10.0;
-                ripple = abs(ripple);
+
+                float ripple = abs(sin(d * 10.0 - u_time * u_rippleSpeed) / 10.0);
                 float rippleIntensity = (0.02 / ripple) * u_rippleGlow;
-                
+
                 float expandRadius = u_activationProgress * 3.0;
                 float expandWave = smoothstep(expandRadius + 0.3, expandRadius - 0.1, d);
-                
                 float expandGlow = exp(-pow(d - expandRadius, 2.0) * 8.0) * (1.0 - u_activationProgress * 0.5);
-                
+
                 float shrinkRadius = 3.0 - u_deactivationProgress * 3.0;
                 float shrinkWave = smoothstep(shrinkRadius + 0.3, shrinkRadius - 0.1, d);
-                
                 float shrinkGlow = exp(-pow(d - shrinkRadius, 2.0) * 8.0) * u_deactivationProgress;
-                
+
                 float finalWave = mix(expandWave, shrinkWave, u_deactivationProgress);
                 float finalGlow = mix(expandGlow, shrinkGlow, u_deactivationProgress);
-                
+
                 float climaxPulse = sin(u_time * 15.0) * 0.5 + 0.5;
                 float climaxWave = smoothstep(0.5, 0.0, d) * u_climaxIntensity * 2.5;
                 float climaxGlow = exp(-d * 1.5) * climaxPulse * u_climaxIntensity * 3.0;
-                
-                vec3 backgroundColor = vec3(0.0, 0.0, 0.0);
+
+                vec3 backgroundColor = vec3(0.02, 0.02, 0.04);
                 vec3 spiralPart = spiralColor * spiralIntensity * finalWave;
                 vec3 ripplePart = rippleColor * rippleIntensity * finalWave;
                 vec3 expandPart = (spiralColor + rippleColor) * finalGlow;
-                
+
                 vec3 finalColor = mix(
                     backgroundColor + spiralPart + ripplePart + expandPart,
                     climaxColor * (climaxWave + climaxGlow),
@@ -1038,75 +1245,51 @@
             }
         `;
 
-        // WebGL Initialization
         const canvas = document.getElementById('glCanvas');
-        
-        if (!canvas) {
-            console.error('Canvas element glCanvas not found');
-            throw new Error('Canvas element not found');
-        }
-        
-        // Dynamically set canvas resolution to fit container
         function resizeCanvas() {
             const container = document.getElementById('container');
-            if (!container) {
-                console.error('Container element not found');
-                return;
-            }
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
+            if (!container) return;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.floor(container.clientWidth * dpr);
+            canvas.height = Math.floor(container.clientHeight * dpr);
         }
-        
+
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
-        
-        const gl = canvas.getContext('webgl');
 
+        const gl = canvas.getContext('webgl');
         if (!gl) {
-            console.error('WebGL not available');
-            alert('Your browser does not support WebGL');
+            showToast('WebGL not supported in this browser');
             throw new Error('WebGL context not available');
         }
-        
-        console.log('WebGL initialization successful');
 
-        // Compile shader
         function createShader(gl, type, source) {
             const shader = gl.createShader(type);
             gl.shaderSource(shader, source);
             gl.compileShader(shader);
-
             if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
                 console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
                 gl.deleteShader(shader);
                 return null;
             }
-
             return shader;
         }
 
-        // Create shader program
         function createShaderProgram(gl, vertexSource, fragmentSource) {
             const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
             const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
-
-            const shaderProgram = gl.createProgram();
-            gl.attachShader(shaderProgram, vertexShader);
-            gl.attachShader(shaderProgram, fragmentShader);
-            gl.linkProgram(shaderProgram);
-
-            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-                console.error('Shader program linking error:', gl.getProgramInfoLog(shaderProgram));
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error('Shader program linking error:', gl.getProgramInfoLog(program));
                 return null;
             }
-
-            return shaderProgram;
+            return program;
         }
 
-        // Initialize shader program
         const shaderProgram = createShaderProgram(gl, vertexShaderSource, fragmentShaderSource);
-
-        // Get attribute and uniform locations
         const programInfo = {
             attribLocations: {
                 vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
@@ -1126,33 +1309,20 @@
             },
         };
 
-        
-        /* ================================================================
-           BUFFER & CONTROL PARAMETERS
-           ================================================================ */
-        
-        // Create buffer
         const positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, 1, 1, 1, -1, -1, 1, -1]), gl.STATIC_DRAW);
 
-        const positions = [
-            -1.0,  1.0,
-             1.0,  1.0,
-            -1.0, -1.0,
-             1.0, -1.0,
-        ];
-
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-        // Control parameters - Default values
+        /* ================================================================
+           PARAMETERS & CONTROLS
+           ================================================================ */
         let spiralArms = 6.0;
         let spiralSpacing = 4.0;
         let spiralGlow = 0.02;
         let rippleGlow = 1.0;
         let rippleSpeed = 4.0;
         let rotationSpeed = 2.0;
-        
-        // For convenient access in setupControls, create a parameter map
+
         const paramMap = {
             spiralArms: () => spiralArms,
             spiralSpacing: () => spiralSpacing,
@@ -1162,98 +1332,80 @@
             rotationSpeed: () => rotationSpeed
         };
 
-        // Auto-save current settings to localStorage
+        function updateSliderFill(slider) {
+            const min = parseFloat(slider.min);
+            const max = parseFloat(slider.max);
+            const val = parseFloat(slider.value);
+            const pct = ((val - min) / (max - min)) * 100;
+            slider.style.setProperty('--fill-pct', `${Math.max(0, Math.min(100, pct))}%`);
+        }
+
         function autoSaveSettings() {
             try {
-                const preset = {
+                localStorage.setItem('hypnosisSettings', JSON.stringify({
                     spiralArms,
                     spiralSpacing,
                     spiralGlow,
                     rippleGlow,
                     rippleSpeed,
                     rotationSpeed
-                };
-                localStorage.setItem('hypnosisSettings', JSON.stringify(preset));
+                }));
             } catch (e) {
-                // If localStorage is not available, fail silently
                 console.warn('Failed to auto-save settings:', e);
             }
         }
 
-        // Auto-load previously saved settings
         function autoLoadSettings() {
             try {
                 const preset = localStorage.getItem('hypnosisSettings');
                 if (preset) {
-                    const settings = JSON.parse(preset);
-                    spiralArms = settings.spiralArms !== undefined ? settings.spiralArms : spiralArms;
-                    spiralSpacing = settings.spiralSpacing !== undefined ? settings.spiralSpacing : spiralSpacing;
-                    spiralGlow = settings.spiralGlow !== undefined ? settings.spiralGlow : spiralGlow;
-                    rippleGlow = settings.rippleGlow !== undefined ? settings.rippleGlow : rippleGlow;
-                    rippleSpeed = settings.rippleSpeed !== undefined ? settings.rippleSpeed : rippleSpeed;
-                    rotationSpeed = settings.rotationSpeed !== undefined ? settings.rotationSpeed : rotationSpeed;
+                    const s = JSON.parse(preset);
+                    if (s.spiralArms !== undefined) spiralArms = s.spiralArms;
+                    if (s.spiralSpacing !== undefined) spiralSpacing = s.spiralSpacing;
+                    if (s.spiralGlow !== undefined) spiralGlow = s.spiralGlow;
+                    if (s.rippleGlow !== undefined) rippleGlow = s.rippleGlow;
+                    if (s.rippleSpeed !== undefined) rippleSpeed = s.rippleSpeed;
+                    if (s.rotationSpeed !== undefined) rotationSpeed = s.rotationSpeed;
                 }
             } catch (e) {
                 console.warn('Failed to auto-load settings:', e);
             }
         }
 
-        // Restore settings when page loads
         autoLoadSettings();
 
-        /* ================================================================
-           CONTROL SETUP & UI INTERACTIONS
-           ================================================================ */
-        
-        // Controller events
-        function setupControls() {
-            const controls = [
-                { id: 'spiralArms', valueId: 'armsValue', variable: 'spiralArms' },
-                { id: 'spiralSpacing', valueId: 'spacingValue', variable: 'spiralSpacing' },
-                { id: 'spiralGlow', valueId: 'spiralGlowValue', variable: 'spiralGlow' },
-                { id: 'rippleGlow', valueId: 'rippleGlowValue', variable: 'rippleGlow' },
-                { id: 'rippleSpeed', valueId: 'rippleSpeedValue', variable: 'rippleSpeed' },
-                { id: 'rotationSpeed', valueId: 'speedValue', variable: 'rotationSpeed' }
-            ];
+        const controlsConfig = [
+            { id: 'spiralArms', valueId: 'armsValue', variable: 'spiralArms' },
+            { id: 'spiralSpacing', valueId: 'spacingValue', variable: 'spiralSpacing' },
+            { id: 'spiralGlow', valueId: 'spiralGlowValue', variable: 'spiralGlow' },
+            { id: 'rippleGlow', valueId: 'rippleGlowValue', variable: 'rippleGlow' },
+            { id: 'rippleSpeed', valueId: 'rippleSpeedValue', variable: 'rippleSpeed' },
+            { id: 'rotationSpeed', valueId: 'speedValue', variable: 'rotationSpeed' }
+        ];
 
-            controls.forEach(control => {
+        function syncControlUI(control, value) {
+            const slider = document.getElementById(control.id);
+            const valueDisplay = document.getElementById(control.valueId);
+            if (!slider || !valueDisplay) return;
+            slider.value = value;
+            updateSliderFill(slider);
+            if (control.variable === 'spiralGlow') {
+                valueDisplay.textContent = value.toFixed(2);
+            } else if (control.variable === 'rippleSpeed') {
+                valueDisplay.textContent = formatRippleSpeed(value);
+            } else {
+                valueDisplay.textContent = value.toFixed(1);
+            }
+        }
+
+        function setupControls() {
+            controlsConfig.forEach(control => {
                 const slider = document.getElementById(control.id);
-                const valueDisplay = document.getElementById(control.valueId);
-                
-                if (!slider || !valueDisplay) {
-                    console.warn(`Element not found: ${control.id} or ${control.valueId}`);
-                    return;
-                }
-                
-                // Initialize slider value to current variable value
-                const currentValue = paramMap[control.variable]();
-                slider.value = currentValue;
-                
-                // Sync display value
-                if (control.variable === 'spiralGlow') {
-                    valueDisplay.textContent = currentValue.toFixed(2);
-                } else if (control.variable === 'rippleSpeed') {
-                    // Display ripple speed with direction and description
-                    const direction = currentValue > 0 ? '(Expanding)' : currentValue < 0 ? '(Contracting)' : '(Stationary)';
-                    valueDisplay.textContent = `${currentValue.toFixed(1)} ${direction}`;
-                } else {
-                    valueDisplay.textContent = currentValue.toFixed(1);
-                }
-                
+                if (!slider) return;
+                syncControlUI(control, paramMap[control.variable]());
                 slider.addEventListener('input', function() {
                     const value = parseFloat(this.value);
-                    // Use more precise display format for spiral glow
-                    if (control.variable === 'spiralGlow') {
-                        valueDisplay.textContent = value.toFixed(2);
-                    } else if (control.variable === 'rippleSpeed') {
-                        // Display ripple speed with direction and description
-                        const direction = value > 0 ? '(Expanding)' : value < 0 ? '(Contracting)' : '(Stationary)';
-                        valueDisplay.textContent = `${value.toFixed(1)} ${direction}`;
-                    } else {
-                        valueDisplay.textContent = value.toFixed(1);
-                    }
-                    
-                    switch(control.variable) {
+                    switch (control.variable) {
                         case 'spiralArms': spiralArms = value; break;
                         case 'spiralSpacing': spiralSpacing = value; break;
                         case 'spiralGlow': spiralGlow = value; break;
@@ -1261,105 +1413,69 @@
                         case 'rippleSpeed': rippleSpeed = value; break;
                         case 'rotationSpeed': rotationSpeed = value; break;
                     }
-                    
-                    // Auto-save every time changes
+                    syncControlUI(control, value);
                     autoSaveSettings();
                 });
             });
         }
 
-        // Set up controls after loading settings to ensure sliders and values are in sync
-        try {
-            setupControls();
-        } catch (e) {
-            console.error('Failed to set up controls:', e);
-        }
-
         /* ================================================================
-           APPLICATION CONTROL & STATE MANAGEMENT
+           APPLICATION STATE & INTERACTIONS
            ================================================================ */
-        
-        // Apply control functionality
         let isPaused = false;
         let isHypnosisActive = false;
-        let hypnosisStartTime = null; // Animation start time
-        let hypnosisEndTime = null; // Animation end time
-        let climaxStartTime = null; // Climax effect start time
-        let animationId;
+        let hypnosisStartTime = null;
+        let hypnosisEndTime = null;
+        let climaxStartTime = null;
 
-        // Start hypnosis button
+        const appShell = document.getElementById('appShell');
+
         window.toggleHypnosis = function() {
-            const hypnosisBtn = document.querySelector('.hypnosis-btn');
             isHypnosisActive = !isHypnosisActive;
             const t = translations[currentLanguage];
-            hypnosisBtn.textContent = isHypnosisActive ? t.endHypnosis : t.startHypnosis;
-            
-            // Manage the visibility of the forced climax button
-            const climaxBtn = document.querySelector('.climax-btn');
-            if (isHypnosisActive) {
-                climaxBtn.classList.add('active');
-            } else {
-                climaxBtn.classList.remove('active');
-            }
-            
-            // When activating hypnosis, reset pause state and start animation
+
+            appShell.classList.toggle('is-active', isHypnosisActive);
+            document.getElementById('hypnosisBtnText').textContent = isHypnosisActive ? t.endHypnosis : t.startHypnosis;
+            document.getElementById('statusText').textContent = isHypnosisActive ? t.statusActive : t.statusIdle;
+            document.getElementById('climaxBtn').classList.toggle('active', isHypnosisActive);
+
             if (isHypnosisActive) {
                 isPaused = false;
-                hypnosisStartTime = null; // Reset to null, will be set to current time on next render
-                hypnosisEndTime = null; // Reset end time
-                
-                // Add startup animation class
-                hypnosisBtn.classList.add('activating');
-                setTimeout(() => hypnosisBtn.classList.remove('activating'), 600);
+                hypnosisStartTime = null;
+                hypnosisEndTime = null;
             } else {
-                // When ending hypnosis, record the time to start fade-out animation
                 hypnosisEndTime = performance.now();
             }
         };
 
-        // Forced climax effect
         window.triggerClimaxEffect = function() {
             if (!isHypnosisActive) {
-                const t = translations[currentLanguage];
-                const alerts = {
-                    ja: '先に催眠を開始してください',
-                    en: 'Please start hypnosis first',
-                    zh: '请先开始催眠'
-                };
-                alert(alerts[currentLanguage] || alerts.en);
+                showToast(translations[currentLanguage].needStart);
                 return;
             }
-            
-            // Record the start time of the climax effect
             climaxStartTime = performance.now();
-            
-            const climaxBtn = document.querySelector('.climax-btn');
-            
-            // Trigger pulse animation
-            climaxBtn.style.animation = 'none';
-            setTimeout(() => {
-                climaxBtn.style.animation = 'climaxPulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            }, 10);
+            const climaxBtn = document.getElementById('climaxBtn');
+            climaxBtn.classList.remove('pulsing');
+            void climaxBtn.offsetWidth;
+            climaxBtn.classList.add('pulsing');
         };
 
-        // Settings menu control
         window.toggleSettings = function() {
             const modal = document.getElementById('settingsModal');
             const overlay = document.getElementById('modalOverlay');
-            modal.classList.toggle('active');
-            overlay.classList.toggle('active');
+            const open = !modal.classList.contains('active');
+            modal.classList.toggle('active', open);
+            overlay.classList.toggle('active', open);
+            appShell.classList.toggle('settings-open', open);
         };
 
         window.closeSettings = function() {
-            const modal = document.getElementById('settingsModal');
-            const overlay = document.getElementById('modalOverlay');
-            modal.classList.remove('active');
-            overlay.classList.remove('active');
+            document.getElementById('settingsModal').classList.remove('active');
+            document.getElementById('modalOverlay').classList.remove('active');
+            appShell.classList.remove('settings-open');
         };
 
-        // Reset all settings
         window.resetAllSettings = function() {
-            // Default values
             const defaults = {
                 spiralArms: 6.0,
                 spiralSpacing: 4.0,
@@ -1368,44 +1484,27 @@
                 rippleSpeed: 4.0,
                 rotationSpeed: 2.0
             };
-            
-            // Reset all input element values
-            document.getElementById('spiralArms').value = defaults.spiralArms;
-            document.getElementById('spiralSpacing').value = defaults.spiralSpacing;
-            document.getElementById('spiralGlow').value = defaults.spiralGlow;
-            document.getElementById('rippleGlow').value = defaults.rippleGlow;
-            document.getElementById('rippleSpeed').value = defaults.rippleSpeed;
-            document.getElementById('rotationSpeed').value = defaults.rotationSpeed;
-            
-            // Update display values
-            document.getElementById('armsValue').textContent = defaults.spiralArms.toFixed(1);
-            document.getElementById('spacingValue').textContent = defaults.spiralSpacing.toFixed(1);
-            document.getElementById('spiralGlowValue').textContent = defaults.spiralGlow.toFixed(2);
-            document.getElementById('rippleGlowValue').textContent = defaults.rippleGlow.toFixed(1);
-            document.getElementById('rippleSpeedValue').textContent = defaults.rippleSpeed.toFixed(1);
-            document.getElementById('speedValue').textContent = defaults.rotationSpeed.toFixed(1);
-            
-            // Update global variables
+
             spiralArms = defaults.spiralArms;
             spiralSpacing = defaults.spiralSpacing;
             spiralGlow = defaults.spiralGlow;
             rippleGlow = defaults.rippleGlow;
             rippleSpeed = defaults.rippleSpeed;
             rotationSpeed = defaults.rotationSpeed;
-            
-            // Clear browser cache (localStorage)
-            localStorage.clear();
-            
-            // Show reset successful feedback with localization
-            const resetMessages = {
-                ja: '✅ すべての設定がリセットされました！',
-                en: '✅ All settings have been reset!',
-                zh: '✅ 所有设置已重置！'
-            };
-            alert(resetMessages[currentLanguage] || resetMessages.en);
+
+            controlsConfig.forEach(control => {
+                syncControlUI(control, defaults[control.variable]);
+            });
+
+            try {
+                localStorage.removeItem('hypnosisSettings');
+            } catch (e) {
+                console.warn('Failed to clear settings:', e);
+            }
+
+            showToast(translations[currentLanguage].resetDone);
         };
 
-        // ESC key closes menu
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeSettings();
@@ -1413,137 +1512,91 @@
         });
 
         /* ================================================================
-           ANIMATION & RENDER LOOP
+           RENDER LOOP
            ================================================================ */
-        
-        // Render loop
         let lastTime = 0;
         let pausedTime = 0;
-        
+
+        function drawShader(currentSpiralGlow, currentRippleGlow, activationProgress, deactivationProgress, climaxIntensity) {
+            gl.useProgram(shaderProgram);
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.vertexAttribPointer(programInfo.attribLocations.vertexPosition, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
+
+            gl.uniform2f(programInfo.uniformLocations.resolution, canvas.width, canvas.height);
+            gl.uniform1f(programInfo.uniformLocations.time, lastTime);
+            gl.uniform1f(programInfo.uniformLocations.spiralArms, spiralArms);
+            gl.uniform1f(programInfo.uniformLocations.spiralSpacing, spiralSpacing);
+            gl.uniform1f(programInfo.uniformLocations.spiralGlow, currentSpiralGlow);
+            gl.uniform1f(programInfo.uniformLocations.rippleGlow, currentRippleGlow);
+            gl.uniform1f(programInfo.uniformLocations.rippleSpeed, rippleSpeed);
+            gl.uniform1f(programInfo.uniformLocations.rotationSpeed, rotationSpeed);
+            gl.uniform1f(programInfo.uniformLocations.activationProgress, activationProgress);
+            gl.uniform1f(programInfo.uniformLocations.deactivationProgress, deactivationProgress);
+            gl.uniform1f(programInfo.uniformLocations.climaxIntensity, climaxIntensity);
+
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+
         function render(time) {
             gl.viewport(0, 0, canvas.width, canvas.height);
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clearColor(0.02, 0.02, 0.04, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT);
 
-            let activationProgress = 0.0;
-            let deactivationProgress = 0.0;
-            
-            // Calculate climax intensity (linear decay from 1.0 to 0.0 over 0.6 seconds from climaxStartTime)
             let climaxIntensity = 0.0;
             if (climaxStartTime !== null) {
-                const climaxDuration = 600; // milliseconds
-                const currentTime = performance.now();
-                const climaxElapsed = currentTime - climaxStartTime;
-                
-                if (climaxElapsed < climaxDuration) {
-                    // Linear decay from 1.0 to 0.0
-                    climaxIntensity = Math.max(0.0, 1.0 - (climaxElapsed / climaxDuration));
+                const elapsed = performance.now() - climaxStartTime;
+                if (elapsed < 600) {
+                    climaxIntensity = Math.max(0.0, 1.0 - elapsed / 600);
                 } else {
-                    // Climax effect has ended
                     climaxStartTime = null;
-                    climaxIntensity = 0.0;
                 }
             }
 
-            // Only draw shader when hypnosis is active
             if (isHypnosisActive) {
-                // If first time activated, record start time
                 if (hypnosisStartTime === null) {
                     hypnosisStartTime = time;
                     hypnosisEndTime = null;
                 }
-
-                // Calculate startup animation progress (0-1, duration 600ms)
-                const activationDuration = 600; // milliseconds
-                activationProgress = Math.min((time - hypnosisStartTime) / activationDuration, 1.0);
-
+                const activationProgress = Math.min((time - hypnosisStartTime) / 600, 1.0);
                 if (!isPaused) {
-                    time *= 0.001; // Convert to seconds
-                    lastTime = time - pausedTime;
+                    lastTime = time * 0.001 - pausedTime;
                 } else {
-                    pausedTime = (time * 0.001) - lastTime;
+                    pausedTime = time * 0.001 - lastTime;
                 }
-
-                gl.useProgram(shaderProgram);
-
-                // Set attributes
-                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-                gl.vertexAttribPointer(programInfo.attribLocations.vertexPosition, 2, gl.FLOAT, false, 0, 0);
-                gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
-
-                // Adjust parameters based on activation progress
-                // Gradually increase spiral intensity, ripple intensity, etc. to create "awakening" effect
-                const currentSpiralGlow = spiralGlow * activationProgress;
-                const currentRippleGlow = rippleGlow * activationProgress;
-
-                // Set uniforms
-                gl.uniform2f(programInfo.uniformLocations.resolution, canvas.width, canvas.height);
-                gl.uniform1f(programInfo.uniformLocations.time, lastTime);
-                gl.uniform1f(programInfo.uniformLocations.spiralArms, spiralArms);
-                gl.uniform1f(programInfo.uniformLocations.spiralSpacing, spiralSpacing);
-                gl.uniform1f(programInfo.uniformLocations.spiralGlow, currentSpiralGlow);
-                gl.uniform1f(programInfo.uniformLocations.rippleGlow, currentRippleGlow);
-                gl.uniform1f(programInfo.uniformLocations.rippleSpeed, rippleSpeed);
-                gl.uniform1f(programInfo.uniformLocations.rotationSpeed, rotationSpeed);
-                gl.uniform1f(programInfo.uniformLocations.activationProgress, activationProgress);
-                gl.uniform1f(programInfo.uniformLocations.deactivationProgress, 0.0);
-                gl.uniform1f(programInfo.uniformLocations.climaxIntensity, climaxIntensity);
-
-                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                drawShader(
+                    spiralGlow * activationProgress,
+                    rippleGlow * activationProgress,
+                    activationProgress,
+                    0.0,
+                    climaxIntensity
+                );
             } else if (hypnosisEndTime !== null) {
-                // Fade-out animation after ending hypnosis
-                const deactivationDuration = 600; // milliseconds
-                const currentTime = performance.now();
-                deactivationProgress = Math.min((currentTime - hypnosisEndTime) / deactivationDuration, 1.0);
-
+                const deactivationProgress = Math.min((performance.now() - hypnosisEndTime) / 600, 1.0);
                 if (deactivationProgress < 1.0) {
-                    // Animation is still in progress
                     if (!isPaused) {
-                        time *= 0.001; // Convert to seconds
-                        lastTime = time - pausedTime;
+                        lastTime = time * 0.001 - pausedTime;
                     } else {
-                        pausedTime = (time * 0.001) - lastTime;
+                        pausedTime = time * 0.001 - lastTime;
                     }
-
-                    gl.useProgram(shaderProgram);
-
-                    // Set attributes
-                    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-                    gl.vertexAttribPointer(programInfo.attribLocations.vertexPosition, 2, gl.FLOAT, false, 0, 0);
-                    gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
-
-                    // Gradually weaken effects during fade-out
-                    const currentSpiralGlow = spiralGlow * (1.0 - deactivationProgress);
-                    const currentRippleGlow = rippleGlow * (1.0 - deactivationProgress);
-
-                    // Set uniforms
-                    gl.uniform2f(programInfo.uniformLocations.resolution, canvas.width, canvas.height);
-                    gl.uniform1f(programInfo.uniformLocations.time, lastTime);
-                    gl.uniform1f(programInfo.uniformLocations.spiralArms, spiralArms);
-                    gl.uniform1f(programInfo.uniformLocations.spiralSpacing, spiralSpacing);
-                    gl.uniform1f(programInfo.uniformLocations.spiralGlow, currentSpiralGlow);
-                    gl.uniform1f(programInfo.uniformLocations.rippleGlow, currentRippleGlow);
-                    gl.uniform1f(programInfo.uniformLocations.rippleSpeed, rippleSpeed);
-                    gl.uniform1f(programInfo.uniformLocations.rotationSpeed, rotationSpeed);
-                    gl.uniform1f(programInfo.uniformLocations.activationProgress, 1.0); // Already fully activated
-                    gl.uniform1f(programInfo.uniformLocations.deactivationProgress, deactivationProgress);
-                    gl.uniform1f(programInfo.uniformLocations.climaxIntensity, climaxIntensity);
-
-                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                    drawShader(
+                        spiralGlow * (1.0 - deactivationProgress),
+                        rippleGlow * (1.0 - deactivationProgress),
+                        1.0,
+                        deactivationProgress,
+                        climaxIntensity
+                    );
                 } else {
-                    // Animation complete, clear end time
                     hypnosisEndTime = null;
                 }
             }
 
-            animationId = requestAnimationFrame(render);
+            requestAnimationFrame(render);
         }
 
-        requestAnimationFrame(render);
-        console.log('Render loop started');
-        
-        // Load language preference
+        setupControls();
         loadLanguagePreference();
+        requestAnimationFrame(render);
     </script>
 </body>
 </html>
